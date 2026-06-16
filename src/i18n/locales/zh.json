@@ -1,0 +1,143 @@
+{
+  "home": {
+    "greeting": "你好, Monaswi",
+    "subtitle": "准备好今天学点新东西了吗？",
+    "studyStreak": "学习连续",
+    "days": "天",
+    "keepItUp": "继续保持！🔥",
+    "quickActions": "快速操作",
+    "scanNotes": "扫描笔记",
+    "generateFlashcards": "生成抽认卡",
+    "quizMe": "测试我",
+    "summarizeText": "总结文本",
+    "recentSessions": "最近学习会话",
+    "viewAll": "查看全部",
+    "askAiTitle": "询问您的 AI 学习伙伴",
+    "askAiSubtitle": "有问题吗？我来帮您！"
+  },
+  "settings": {
+    "title": "设置",
+    "account": "账户",
+    "editProfile": "编辑个人资料",
+    "changePassword": "更改密码",
+    "preferences": "偏好设置",
+    "pushNotifications": "推送通知",
+    "darkMode": "深色模式",
+    "language": "语言",
+    "about": "关于",
+    "privacyPolicy": "隐私政策",
+    "termsOfService": "服务条款",
+    "appVersion": "应用版本"
+  },
+  "profile": {
+    "title": "个人资料",
+    "premiumUser": "✨ 高级用户",
+    "studyGoals": "学习目标",
+    "revisionHistory": "复习历史",
+    "savedNotes": "保存的笔记",
+    "aiStudyBuddy": "AI 学习伙伴",
+    "helpSupport": "帮助与支持",
+    "logOut": "退出登录",
+    "save": "保存",
+    "fullName": "全名",
+    "emailAddress": "电子邮件地址"
+  },
+  "language": {
+    "title": "语言",
+    "english": "英语",
+    "spanish": "西班牙语",
+    "french": "法语",
+    "german": "德语",
+    "hindi": "印地语",
+    "japanese": "日语",
+    "korean": "韩语"
+  },
+  "library": {
+    "title": "图书馆",
+    "all": "全部",
+    "notes": "笔记",
+    "flashcards": "抽认卡",
+    "quizzes": "测验"
+  },
+  "stats": {
+    "thisWeek": "本周",
+    "studyTime": "学习时间",
+    "cardsReviewed": "复习的卡片",
+    "quizzesTaken": "完成的测验",
+    "averageScore": "平均分",
+    "studyTimeH": "学习时间 (小时)",
+    "avg": "平均"
+  },
+  "password": {
+    "current": "当前密码",
+    "new": "新密码",
+    "confirm": "确认新密码",
+    "update": "更新密码"
+  },
+  "goals": {
+    "title": "学习目标",
+    "dailyTime": "每日学习时间",
+    "dailyDesc": "设置您每天的目标专注时间。",
+    "min": "分钟",
+    "weeklyCards": "每周抽认卡",
+    "weeklyDesc": "您本周想复习多少张卡片？",
+    "cards": "张",
+    "reminders": "每日提醒",
+    "save": "保存目标"
+  },
+  "generate": {
+    "title": "生成材料",
+    "inputSource": "输入来源",
+    "scanNotes": "扫描笔记",
+    "uploadPdf": "上传 PDF",
+    "pasteText": "或者在此处粘贴您的文本...",
+    "outputType": "输出类型",
+    "difficultyLevel": "难度级别",
+    "generateWithAi": "用 AI 生成",
+    "easy": "简单",
+    "medium": "中等",
+    "hard": "困难",
+    "mindMap": "思维导图"
+  },
+  "processing": {
+    "title": "AI 学习助手正在工作",
+    "step1": "正在分析您的笔记...",
+    "step2": "正在提取关键概念...",
+    "step3": "正在生成智能材料..."
+  },
+  "flashcard": {
+    "cardOf": "卡片 {{current}} / {{total}}",
+    "question": "问题",
+    "tapToFlip": "点击翻转",
+    "answer": "答案",
+    "showAnswer": "显示答案",
+    "needReview": "需要复习",
+    "gotIt": "明白了"
+  },
+  "summary": {
+    "title": "笔记摘要",
+    "generatedNow": "刚刚生成",
+    "tldr": "太长不看",
+    "readyToTest": "准备好测试自己了吗？",
+    "turnIntoQuiz": "立即将此摘要转换为测验。",
+    "generateQuiz": "生成测验"
+  },
+  "quiz": {
+    "title": "生物测验",
+    "questionOf": "问题 {{current}} / {{total}}",
+    "submitAnswer": "提交答案",
+    "nextQuestion": "下一题",
+    "viewResults": "查看结果",
+    "goodEffort": "再接再厉！",
+    "keepReviewing": "继续复习以达到 100%。",
+    "perfectScore": "满分！",
+    "mastered": "您已经掌握了这个主题。",
+    "greatJob": "干得好！",
+    "almostThere": "差不多了。",
+    "scoreLabel": "分数",
+    "correct": "正确",
+    "incorrect": "错误",
+    "retakeQuiz": "重考测验",
+    "backToHome": "返回主页"
+  }
+}

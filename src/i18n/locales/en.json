@@ -1,0 +1,143 @@
+{
+  "home": {
+    "greeting": "Hi, Monaswi",
+    "subtitle": "Ready to learn something new today?",
+    "studyStreak": "Study Streak",
+    "days": "days",
+    "keepItUp": "Keep it up! 🔥",
+    "quickActions": "Quick Actions",
+    "scanNotes": "Scan Notes",
+    "generateFlashcards": "Generate Flashcards",
+    "quizMe": "Quiz Me",
+    "summarizeText": "Summarize Text",
+    "recentSessions": "Recent Study Sessions",
+    "viewAll": "View All",
+    "askAiTitle": "Ask your AI Study Buddy",
+    "askAiSubtitle": "Got a question? I'm here to help!"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "editProfile": "Edit Profile",
+    "changePassword": "Change Password",
+    "preferences": "Preferences",
+    "pushNotifications": "Push Notifications",
+    "darkMode": "Dark Mode",
+    "language": "Language",
+    "about": "About",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "appVersion": "App Version"
+  },
+  "profile": {
+    "title": "Profile",
+    "premiumUser": "✨ Premium User",
+    "studyGoals": "Study Goals",
+    "revisionHistory": "Revision History",
+    "savedNotes": "Saved Notes",
+    "aiStudyBuddy": "AI Study Buddy",
+    "helpSupport": "Help & Support",
+    "logOut": "Log Out",
+    "save": "Save",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address"
+  },
+  "language": {
+    "title": "Language",
+    "english": "English",
+    "spanish": "Spanish",
+    "french": "French",
+    "german": "German",
+    "hindi": "Hindi",
+    "japanese": "Japanese",
+    "korean": "Korean"
+  },
+  "library": {
+    "title": "Library",
+    "all": "All",
+    "notes": "Notes",
+    "flashcards": "Flashcards",
+    "quizzes": "Quizzes"
+  },
+  "stats": {
+    "thisWeek": "This Week",
+    "studyTime": "Study Time",
+    "cardsReviewed": "Cards Reviewed",
+    "quizzesTaken": "Quizzes Taken",
+    "averageScore": "Average Score",
+    "studyTimeH": "Study Time (h)",
+    "avg": "avg"
+  },
+  "password": {
+    "current": "Current Password",
+    "new": "New Password",
+    "confirm": "Confirm New Password",
+    "update": "Update Password"
+  },
+  "goals": {
+    "title": "Study Goals",
+    "dailyTime": "Daily Study Time",
+    "dailyDesc": "Set your target focus time per day.",
+    "min": "min",
+    "weeklyCards": "Weekly Flashcards",
+    "weeklyDesc": "How many cards do you want to review this week?",
+    "cards": "cards",
+    "reminders": "Daily Reminders",
+    "save": "Save Goals"
+  },
+  "generate": {
+    "title": "Generate Materials",
+    "inputSource": "Input Source",
+    "scanNotes": "Scan Notes",
+    "uploadPdf": "Upload PDF",
+    "pasteText": "Or paste your text here...",
+    "outputType": "Output Type",
+    "difficultyLevel": "Difficulty Level",
+    "generateWithAi": "Generate with AI",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "mindMap": "Mind Map"
+  },
+  "processing": {
+    "title": "AI Study Buddy is working",
+    "step1": "Analyzing your notes...",
+    "step2": "Extracting key concepts...",
+    "step3": "Generating smart materials..."
+  },
+  "flashcard": {
+    "cardOf": "Card {{current}} of {{total}}",
+    "question": "QUESTION",
+    "tapToFlip": "Tap to flip",
+    "answer": "ANSWER",
+    "showAnswer": "Show Answer",
+    "needReview": "Need Review",
+    "gotIt": "Got It"
+  },
+  "summary": {
+    "title": "Notes Summary",
+    "generatedNow": "Generated just now",
+    "tldr": "TL;DR",
+    "readyToTest": "Ready to test yourself?",
+    "turnIntoQuiz": "Turn this summary into a quiz instantly.",
+    "generateQuiz": "Generate Quiz"
+  },
+  "quiz": {
+    "title": "Biology Quiz",
+    "questionOf": "Question {{current}} of {{total}}",
+    "submitAnswer": "Submit Answer",
+    "nextQuestion": "Next Question",
+    "viewResults": "View Results",
+    "goodEffort": "Good effort!",
+    "keepReviewing": "Keep reviewing to hit 100%.",
+    "perfectScore": "Perfect Score!",
+    "mastered": "You've mastered this topic.",
+    "greatJob": "Great Job!",
+    "almostThere": "You're almost there.",
+    "scoreLabel": "Score",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "retakeQuiz": "Retake Quiz",
+    "backToHome": "Back to Home"
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "home": {
+    "greeting": "こんにちは, Monaswi",
+    "subtitle": "今日何か新しいことを学ぶ準備はできていますか？",
+    "studyStreak": "学習の連続",
+    "days": "日",
+    "keepItUp": "その調子！ 🔥",
+    "quickActions": "クイックアクション",
+    "scanNotes": "ノートをスキャン",
+    "generateFlashcards": "フラッシュカードを作成",
+    "quizMe": "クイズをする",
+    "summarizeText": "テキストを要約",
+    "recentSessions": "最近の学習セッション",
+    "viewAll": "すべて見る",
+    "askAiTitle": "AI学習バディに聞く",
+    "askAiSubtitle": "質問はありますか？私がお手伝いします！"
+  },
+  "settings": {
+    "title": "設定",
+    "account": "アカウント",
+    "editProfile": "プロフィール編集",
+    "changePassword": "パスワード変更",
+    "preferences": "設定",
+    "pushNotifications": "プッシュ通知",
+    "darkMode": "ダークモード",
+    "language": "言語",
+    "about": "アプリについて",
+    "privacyPolicy": "プライバシーポリシー",
+    "termsOfService": "利用規約",
+    "appVersion": "アプリのバージョン"
+  },
+  "profile": {
+    "title": "プロフィール",
+    "premiumUser": "✨ プレミアムユーザー",
+    "studyGoals": "学習目標",
+    "revisionHistory": "復習の履歴",
+    "savedNotes": "保存したノート",
+    "aiStudyBuddy": "AI学習バディ",
+    "helpSupport": "ヘルプとサポート",
+    "logOut": "ログアウト",
+    "save": "保存",
+    "fullName": "フルネーム",
+    "emailAddress": "メールアドレス"
+  },
+  "language": {
+    "title": "言語",
+    "english": "英語",
+    "spanish": "スペイン語",
+    "french": "フランス語",
+    "german": "ドイツ語",
+    "hindi": "ヒンディー語",
+    "japanese": "日本語",
+    "korean": "韓国語"
+  },
+  "library": {
+    "title": "ライブラリ",
+    "all": "すべて",
+    "notes": "ノート",
+    "flashcards": "フラッシュカード",
+    "quizzes": "クイズ"
+  },
+  "stats": {
+    "thisWeek": "今週",
+    "studyTime": "学習時間",
+    "cardsReviewed": "復習したカード",
+    "quizzesTaken": "受けたクイズ",
+    "averageScore": "平均スコア",
+    "studyTimeH": "学習時間 (時間)",
+    "avg": "平均"
+  },
+  "password": {
+    "current": "現在のパスワード",
+    "new": "新しいパスワード",
+    "confirm": "新しいパスワード（確認）",
+    "update": "パスワードを更新"
+  },
+  "goals": {
+    "title": "学習目標",
+    "dailyTime": "1日の学習時間",
+    "dailyDesc": "1日の目標集中時間を設定してください。",
+    "min": "分",
+    "weeklyCards": "今週のカード",
+    "weeklyDesc": "今週は何枚のカードを復習しますか？",
+    "cards": "枚",
+    "reminders": "毎日のリマインダー",
+    "save": "目標を保存"
+  },
+  "generate": {
+    "title": "教材を生成",
+    "inputSource": "入力ソース",
+    "scanNotes": "ノートをスキャン",
+    "uploadPdf": "PDFをアップロード",
+    "pasteText": "またはテキストをここに貼り付けてください...",
+    "outputType": "出力タイプ",
+    "difficultyLevel": "難易度",
+    "generateWithAi": "AIで生成",
+    "easy": "簡単",
+    "medium": "普通",
+    "hard": "難しい",
+    "mindMap": "マインドマップ"
+  },
+  "processing": {
+    "title": "AIスタディバディが作業中です",
+    "step1": "ノートを分析しています...",
+    "step2": "重要な概念を抽出しています...",
+    "step3": "スマートな教材を生成しています..."
+  },
+  "flashcard": {
+    "cardOf": "{{total}}枚中{{current}}枚目",
+    "question": "問題",
+    "tapToFlip": "タップして裏返す",
+    "answer": "答え",
+    "showAnswer": "答えを表示",
+    "needReview": "要復習",
+    "gotIt": "覚えた"
+  },
+  "summary": {
+    "title": "ノートの要約",
+    "generatedNow": "たった今生成されました",
+    "tldr": "要約",
+    "readyToTest": "テストの準備はいいですか？",
+    "turnIntoQuiz": "この要約をすぐにクイズに変換します。",
+    "generateQuiz": "クイズを生成"
+  },
+  "quiz": {
+    "title": "生物学クイズ",
+    "questionOf": "{{total}}問中{{current}}問目",
+    "submitAnswer": "回答を送信",
+    "nextQuestion": "次の問題",
+    "viewResults": "結果を見る",
+    "goodEffort": "よく頑張りました！",
+    "keepReviewing": "100%を目指して復習を続けましょう。",
+    "perfectScore": "満点！",
+    "mastered": "このトピックをマスターしました。",
+    "greatJob": "よくできました！",
+    "almostThere": "あと少しです。",
+    "scoreLabel": "スコア",
+    "correct": "正解",
+    "incorrect": "不正解",
+    "retakeQuiz": "もう一度受ける",
+    "backToHome": "ホームに戻る"
+  }
+}

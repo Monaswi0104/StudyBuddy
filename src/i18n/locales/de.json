@@ -1,0 +1,143 @@
+{
+  "home": {
+    "greeting": "Hallo, Monaswi",
+    "subtitle": "Bereit, heute etwas Neues zu lernen?",
+    "studyStreak": "Lernsträhne",
+    "days": "Tage",
+    "keepItUp": "Weiter so! 🔥",
+    "quickActions": "Schnellzugriff",
+    "scanNotes": "Notizen scannen",
+    "generateFlashcards": "Karteikarten erstellen",
+    "quizMe": "Quiz mich",
+    "summarizeText": "Text zusammenfassen",
+    "recentSessions": "Letzte Lernsitzungen",
+    "viewAll": "Alle ansehen",
+    "askAiTitle": "Frag deinen KI-Lernbegleiter",
+    "askAiSubtitle": "Hast du eine Frage? Ich bin hier, um zu helfen!"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "account": "Konto",
+    "editProfile": "Profil bearbeiten",
+    "changePassword": "Passwort ändern",
+    "preferences": "Präferenzen",
+    "pushNotifications": "Push-Benachrichtigungen",
+    "darkMode": "Dunkelmodus",
+    "language": "Sprache",
+    "about": "Über uns",
+    "privacyPolicy": "Datenschutzerklärung",
+    "termsOfService": "Nutzungsbedingungen",
+    "appVersion": "App-Version"
+  },
+  "profile": {
+    "title": "Profil",
+    "premiumUser": "✨ Premium-Nutzer",
+    "studyGoals": "Lernziele",
+    "revisionHistory": "Wiederholungsverlauf",
+    "savedNotes": "Gespeicherte Notizen",
+    "aiStudyBuddy": "KI-Lernbegleiter",
+    "helpSupport": "Hilfe & Support",
+    "logOut": "Abmelden",
+    "save": "Speichern",
+    "fullName": "Vollständiger Name",
+    "emailAddress": "E-Mail Adresse"
+  },
+  "language": {
+    "title": "Sprache",
+    "english": "Englisch",
+    "spanish": "Spanisch",
+    "french": "Französisch",
+    "german": "Deutsch",
+    "hindi": "Hindi",
+    "japanese": "Japanisch",
+    "korean": "Koreanisch"
+  },
+  "library": {
+    "title": "Bibliothek",
+    "all": "Alle",
+    "notes": "Notizen",
+    "flashcards": "Karteikarten",
+    "quizzes": "Quiz"
+  },
+  "stats": {
+    "thisWeek": "Diese Woche",
+    "studyTime": "Lernzeit",
+    "cardsReviewed": "Karten wiederholt",
+    "quizzesTaken": "Quiz gemacht",
+    "averageScore": "Durchschnitt",
+    "studyTimeH": "Lernzeit (h)",
+    "avg": "Durchs."
+  },
+  "password": {
+    "current": "Aktuelles Passwort",
+    "new": "Neues Passwort",
+    "confirm": "Neues Passwort bestätigen",
+    "update": "Passwort aktualisieren"
+  },
+  "goals": {
+    "title": "Lernziele",
+    "dailyTime": "Tägliche Lernzeit",
+    "dailyDesc": "Lege deine tägliche Fokuszeit fest.",
+    "min": "Min",
+    "weeklyCards": "Wöchentliche Karten",
+    "weeklyDesc": "Wie viele Karten möchtest du diese Woche wiederholen?",
+    "cards": "Karten",
+    "reminders": "Tägliche Erinnerungen",
+    "save": "Ziele speichern"
+  },
+  "generate": {
+    "title": "Materialien generieren",
+    "inputSource": "Eingabequelle",
+    "scanNotes": "Notizen scannen",
+    "uploadPdf": "PDF hochladen",
+    "pasteText": "Oder füge deinen Text hier ein...",
+    "outputType": "Ausgabetyp",
+    "difficultyLevel": "Schwierigkeitsgrad",
+    "generateWithAi": "Mit KI generieren",
+    "easy": "Einfach",
+    "medium": "Mittel",
+    "hard": "Schwer",
+    "mindMap": "Mindmap"
+  },
+  "processing": {
+    "title": "KI Study Buddy arbeitet",
+    "step1": "Analysiere deine Notizen...",
+    "step2": "Extrahiere Schlüsselkonzepte...",
+    "step3": "Generiere smarte Materialien..."
+  },
+  "flashcard": {
+    "cardOf": "Karte {{current}} von {{total}}",
+    "question": "FRAGE",
+    "tapToFlip": "Tippen zum Umdrehen",
+    "answer": "ANTWORT",
+    "showAnswer": "Antwort anzeigen",
+    "needReview": "Wiederholen",
+    "gotIt": "Verstanden"
+  },
+  "summary": {
+    "title": "Notizen-Zusammenfassung",
+    "generatedNow": "Gerade generiert",
+    "tldr": "Kurzfassung",
+    "readyToTest": "Bereit, dich selbst zu testen?",
+    "turnIntoQuiz": "Verwandle diese Zusammenfassung sofort in ein Quiz.",
+    "generateQuiz": "Quiz generieren"
+  },
+  "quiz": {
+    "title": "Biologie-Quiz",
+    "questionOf": "Frage {{current}} von {{total}}",
+    "submitAnswer": "Antwort einreichen",
+    "nextQuestion": "Nächste Frage",
+    "viewResults": "Ergebnisse ansehen",
+    "goodEffort": "Guter Einsatz!",
+    "keepReviewing": "Weiter üben, um 100% zu erreichen.",
+    "perfectScore": "Perfektes Ergebnis!",
+    "mastered": "Du beherrschst dieses Thema.",
+    "greatJob": "Großartige Arbeit!",
+    "almostThere": "Du bist fast da.",
+    "scoreLabel": "Punktzahl",
+    "correct": "Richtig",
+    "incorrect": "Falsch",
+    "retakeQuiz": "Quiz wiederholen",
+    "backToHome": "Zurück zur Startseite"
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "home": {
+    "greeting": "Hola, Monaswi",
+    "subtitle": "¿Listo para aprender algo nuevo hoy?",
+    "studyStreak": "Racha de estudio",
+    "days": "días",
+    "keepItUp": "¡Sigue así! 🔥",
+    "quickActions": "Acciones rápidas",
+    "scanNotes": "Escanear notas",
+    "generateFlashcards": "Crear tarjetas",
+    "quizMe": "Hacerme un quiz",
+    "summarizeText": "Resumir texto",
+    "recentSessions": "Sesiones recientes",
+    "viewAll": "Ver todo",
+    "askAiTitle": "Pregunta a tu compañero de IA",
+    "askAiSubtitle": "¿Tienes una pregunta? ¡Estoy aquí para ayudarte!"
+  },
+  "settings": {
+    "title": "Configuración",
+    "account": "Cuenta",
+    "editProfile": "Editar perfil",
+    "changePassword": "Cambiar contraseña",
+    "preferences": "Preferencias",
+    "pushNotifications": "Notificaciones push",
+    "darkMode": "Modo oscuro",
+    "language": "Idioma",
+    "about": "Acerca de",
+    "privacyPolicy": "Política de privacidad",
+    "termsOfService": "Términos de servicio",
+    "appVersion": "Versión de la aplicación"
+  },
+  "profile": {
+    "title": "Perfil",
+    "premiumUser": "✨ Usuario Premium",
+    "studyGoals": "Metas de estudio",
+    "revisionHistory": "Historial de revisión",
+    "savedNotes": "Notas guardadas",
+    "aiStudyBuddy": "Compañero de estudio de IA",
+    "helpSupport": "Ayuda y soporte",
+    "logOut": "Cerrar sesión",
+    "save": "Guardar",
+    "fullName": "Nombre completo",
+    "emailAddress": "Correo electrónico"
+  },
+  "language": {
+    "title": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español",
+    "french": "Francés",
+    "german": "Alemán",
+    "hindi": "Hindi",
+    "japanese": "Japonés",
+    "korean": "Coreano"
+  },
+  "library": {
+    "title": "Biblioteca",
+    "all": "Todo",
+    "notes": "Notas",
+    "flashcards": "Tarjetas",
+    "quizzes": "Cuestionarios"
+  },
+  "stats": {
+    "thisWeek": "Esta semana",
+    "studyTime": "Tiempo de estudio",
+    "cardsReviewed": "Tarjetas revisadas",
+    "quizzesTaken": "Cuestionarios tomados",
+    "averageScore": "Puntaje promedio",
+    "studyTimeH": "Tiempo de estudio (h)",
+    "avg": "prom."
+  },
+  "password": {
+    "current": "Contraseña actual",
+    "new": "Nueva contraseña",
+    "confirm": "Confirmar nueva contraseña",
+    "update": "Actualizar contraseña"
+  },
+  "goals": {
+    "title": "Metas de estudio",
+    "dailyTime": "Tiempo de estudio diario",
+    "dailyDesc": "Establece tu tiempo de enfoque objetivo por día.",
+    "min": "min",
+    "weeklyCards": "Tarjetas semanales",
+    "weeklyDesc": "¿Cuántas tarjetas quieres repasar esta semana?",
+    "cards": "tarjetas",
+    "reminders": "Recordatorios diarios",
+    "save": "Guardar metas"
+  },
+  "generate": {
+    "title": "Generar materiales",
+    "inputSource": "Fuente de entrada",
+    "scanNotes": "Escanear notas",
+    "uploadPdf": "Subir PDF",
+    "pasteText": "O pegue su texto aquí...",
+    "outputType": "Tipo de salida",
+    "difficultyLevel": "Nivel de dificultad",
+    "generateWithAi": "Generar con IA",
+    "easy": "Fácil",
+    "medium": "Medio",
+    "hard": "Difícil",
+    "mindMap": "Mapa mental"
+  },
+  "processing": {
+    "title": "AI Study Buddy está trabajando",
+    "step1": "Analizando tus notas...",
+    "step2": "Extrayendo conceptos clave...",
+    "step3": "Generando materiales inteligentes..."
+  },
+  "flashcard": {
+    "cardOf": "Tarjeta {{current}} de {{total}}",
+    "question": "PREGUNTA",
+    "tapToFlip": "Toca para voltear",
+    "answer": "RESPUESTA",
+    "showAnswer": "Mostrar respuesta",
+    "needReview": "Necesita repaso",
+    "gotIt": "Entendido"
+  },
+  "summary": {
+    "title": "Resumen de notas",
+    "generatedNow": "Generado justo ahora",
+    "tldr": "Resumen",
+    "readyToTest": "¿Listo para ponerte a prueba?",
+    "turnIntoQuiz": "Convierte este resumen en un cuestionario al instante.",
+    "generateQuiz": "Generar cuestionario"
+  },
+  "quiz": {
+    "title": "Cuestionario de biología",
+    "questionOf": "Pregunta {{current}} de {{total}}",
+    "submitAnswer": "Enviar respuesta",
+    "nextQuestion": "Siguiente pregunta",
+    "viewResults": "Ver resultados",
+    "goodEffort": "¡Buen esfuerzo!",
+    "keepReviewing": "Sigue repasando para alcanzar el 100%.",
+    "perfectScore": "¡Puntuación perfecta!",
+    "mastered": "Has dominado este tema.",
+    "greatJob": "¡Buen trabajo!",
+    "almostThere": "Estás casi ahí.",
+    "scoreLabel": "Puntuación",
+    "correct": "Correcto",
+    "incorrect": "Incorrecto",
+    "retakeQuiz": "Volver a hacer",
+    "backToHome": "Volver al inicio"
+  }
+}

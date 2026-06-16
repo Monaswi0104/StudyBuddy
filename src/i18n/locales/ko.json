@@ -1,0 +1,143 @@
+{
+  "home": {
+    "greeting": "안녕, Monaswi",
+    "subtitle": "오늘 새로운 것을 배울 준비가 되셨나요?",
+    "studyStreak": "학습 연속",
+    "days": "일",
+    "keepItUp": "계속 하세요! 🔥",
+    "quickActions": "빠른 실행",
+    "scanNotes": "노트 스캔",
+    "generateFlashcards": "플래시카드 생성",
+    "quizMe": "퀴즈 풀기",
+    "summarizeText": "텍스트 요약",
+    "recentSessions": "최근 학습 세션",
+    "viewAll": "모두 보기",
+    "askAiTitle": "AI 학습 친구에게 물어보세요",
+    "askAiSubtitle": "질문이 있나요? 제가 도와드릴게요!"
+  },
+  "settings": {
+    "title": "설정",
+    "account": "계정",
+    "editProfile": "프로필 편집",
+    "changePassword": "비밀번호 변경",
+    "preferences": "기본 설정",
+    "pushNotifications": "푸시 알림",
+    "darkMode": "다크 모드",
+    "language": "언어",
+    "about": "정보",
+    "privacyPolicy": "개인정보 보호정책",
+    "termsOfService": "서비스 약관",
+    "appVersion": "앱 버전"
+  },
+  "profile": {
+    "title": "프로필",
+    "premiumUser": "✨ 프리미엄 사용자",
+    "studyGoals": "학습 목표",
+    "revisionHistory": "복습 기록",
+    "savedNotes": "저장된 노트",
+    "aiStudyBuddy": "AI 학습 친구",
+    "helpSupport": "도움말 및 지원",
+    "logOut": "로그아웃",
+    "save": "저장",
+    "fullName": "성명",
+    "emailAddress": "이메일 주소"
+  },
+  "language": {
+    "title": "언어",
+    "english": "영어",
+    "spanish": "스페인어",
+    "french": "프랑스어",
+    "german": "독일어",
+    "hindi": "힌디어",
+    "japanese": "일본어",
+    "korean": "한국어"
+  },
+  "library": {
+    "title": "라이브러리",
+    "all": "전체",
+    "notes": "노트",
+    "flashcards": "플래시카드",
+    "quizzes": "퀴즈"
+  },
+  "stats": {
+    "thisWeek": "이번 주",
+    "studyTime": "학습 시간",
+    "cardsReviewed": "복습한 카드",
+    "quizzesTaken": "푼 퀴즈",
+    "averageScore": "평균 점수",
+    "studyTimeH": "학습 시간 (시간)",
+    "avg": "평균"
+  },
+  "password": {
+    "current": "현재 비밀번호",
+    "new": "새 비밀번호",
+    "confirm": "새 비밀번호 확인",
+    "update": "비밀번호 업데이트"
+  },
+  "goals": {
+    "title": "학습 목표",
+    "dailyTime": "일일 학습 시간",
+    "dailyDesc": "하루 목표 집중 시간을 설정하세요.",
+    "min": "분",
+    "weeklyCards": "주간 플래시카드",
+    "weeklyDesc": "이번 주에 몇 장의 카드를 복습하시겠습니까?",
+    "cards": "장",
+    "reminders": "일일 알림",
+    "save": "목표 저장"
+  },
+  "generate": {
+    "title": "자료 생성",
+    "inputSource": "입력 소스",
+    "scanNotes": "노트 스캔",
+    "uploadPdf": "PDF 업로드",
+    "pasteText": "또는 여기에 텍스트를 붙여넣으세요...",
+    "outputType": "출력 형식",
+    "difficultyLevel": "난이도",
+    "generateWithAi": "AI로 생성",
+    "easy": "쉬움",
+    "medium": "보통",
+    "hard": "어려움",
+    "mindMap": "마인드 맵"
+  },
+  "processing": {
+    "title": "AI 스터디 버디가 작업 중입니다",
+    "step1": "노트 분석 중...",
+    "step2": "핵심 개념 추출 중...",
+    "step3": "스마트 학습 자료 생성 중..."
+  },
+  "flashcard": {
+    "cardOf": "카드 {{current}} / {{total}}",
+    "question": "질문",
+    "tapToFlip": "탭하여 뒤집기",
+    "answer": "답변",
+    "showAnswer": "답변 보기",
+    "needReview": "복습 필요",
+    "gotIt": "이해함"
+  },
+  "summary": {
+    "title": "노트 요약",
+    "generatedNow": "방금 생성됨",
+    "tldr": "요약",
+    "readyToTest": "테스트할 준비가 되셨나요?",
+    "turnIntoQuiz": "이 요약을 즉시 퀴즈로 만드세요.",
+    "generateQuiz": "퀴즈 생성"
+  },
+  "quiz": {
+    "title": "생물학 퀴즈",
+    "questionOf": "질문 {{current}} / {{total}}",
+    "submitAnswer": "답변 제출",
+    "nextQuestion": "다음 질문",
+    "viewResults": "결과 보기",
+    "goodEffort": "좋은 노력입니다!",
+    "keepReviewing": "100%를 달성하기 위해 계속 복습하세요.",
+    "perfectScore": "만점!",
+    "mastered": "이 주제를 마스터했습니다.",
+    "greatJob": "잘했어요!",
+    "almostThere": "거의 다 왔습니다.",
+    "scoreLabel": "점수",
+    "correct": "정답",
+    "incorrect": "오답",
+    "retakeQuiz": "퀴즈 다시 풀기",
+    "backToHome": "홈으로 돌아가기"
+  }
+}
