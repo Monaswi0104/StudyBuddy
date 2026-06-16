@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, TextInput, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Search, FileText, Layers, HelpCircle, ChevronRight } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/StackNav';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useStudyStore } from '../store/studyStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -16,6 +17,10 @@ export const LibraryScreen = () => {
   const { colors, isDarkMode } = useTheme();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const materials = useStudyStore((state) => state.materials);
+  const deleteMaterial = useStudyStore((state) => state.deleteMaterial);
 
   // Staggered animations
   const headerFade = useRef(new Animated.Value(0)).current;
@@ -41,26 +46,35 @@ export const LibraryScreen = () => {
 
   const tabs = [
     { key: 'All', label: t('library.all') },
-    { key: 'Notes', label: t('library.notes') },
     { key: 'Flashcards', label: t('library.flashcards') },
-    { key: 'Quizzes', label: t('library.quizzes') },
+    { key: 'Quiz', label: t('library.quizzes') },
+    { key: 'Summary', label: 'Summary' },
   ];
 
-  const libraryItems = [
-    { id: '1', title: 'Photosynthesis Notes', subtitle: 'Today • 20 cards', type: 'Flashcards', icon: Layers, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
-    { id: '2', title: 'Machine Learning Basics', subtitle: 'Yesterday • 28 cards', type: 'Flashcards', icon: Layers, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
-    { id: '3', title: 'Neural Networks', subtitle: '2 days ago • 30 cards', type: 'Flashcards', icon: Layers, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
-    { id: '4', title: 'Data Structures Notes', subtitle: '3 days ago • Notes', type: 'Notes', icon: FileText, color: '#F59E0B', bg: isDarkMode ? 'rgba(245,158,11,0.15)' : '#FFF8EB' },
-    { id: '5', title: 'Operating System Concepts', subtitle: '6 days ago • 10 cards', type: 'Quiz', icon: HelpCircle, color: '#3B82F6', bg: isDarkMode ? 'rgba(59,130,246,0.15)' : '#EFF6FF' },
-    { id: '6', title: 'Database Management', subtitle: '1 week ago • 22 cards', type: 'Flashcards', icon: Layers, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
-  ];
+  const typeToIcon: Record<string, { icon: any; color: string; bg: string }> = {
+    'Flashcards': { icon: Layers, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
+    'Quiz': { icon: HelpCircle, color: '#3B82F6', bg: isDarkMode ? 'rgba(59,130,246,0.15)' : '#EFF6FF' },
+    'Summary': { icon: FileText, color: '#F59E0B', bg: isDarkMode ? 'rgba(245,158,11,0.15)' : '#FFF8EB' },
+    'Mind Map': { icon: Layers, color: '#8B5CF6', bg: isDarkMode ? 'rgba(139,92,246,0.15)' : '#F5F3FF' },
+  };
 
-  const filteredItems = libraryItems.filter(item => {
-    if (activeTab === 'All') return true;
-    if (activeTab === 'Notes' && item.type === 'Notes') return true;
-    if (activeTab === 'Flashcards' && item.type === 'Flashcards') return true;
-    if (activeTab === 'Quizzes' && item.type === 'Quiz') return true;
-    return false;
+  // Time ago helper
+  const timeAgo = (ts: number) => {
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'Yesterday';
+    return `${days} days ago`;
+  };
+
+  const filteredItems = materials.filter(item => {
+    const matchesTab = activeTab === 'All' || item.type === activeTab;
+    const matchesSearch = !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesTab && matchesSearch;
   });
 
   return (
@@ -74,10 +88,25 @@ export const LibraryScreen = () => {
         <TouchableOpacity style={[styles.searchBtn, {
           backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
           borderColor: isDarkMode ? colors.border : '#F3F4F6',
-        }]}>
+        }]} onPress={() => setIsSearchVisible(!isSearchVisible)}>
           <Search color={colors.text} size={20} />
         </TouchableOpacity>
       </Animated.View>
+
+      {/* Search Bar */}
+      {isSearchVisible && (
+        <View style={[styles.searchBarContainer, { backgroundColor: isDarkMode ? colors.surface : '#FFFFFF', borderColor: isDarkMode ? colors.border : '#F3F4F6' }]}>
+          <Search color={colors.textSecondary} size={16} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder="Search materials..."
+            placeholderTextColor={colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+          />
+        </View>
+      )}
 
       {/* Tabs */}
       <Animated.View style={[styles.tabsContainer, { opacity: tabsFade, transform: [{ translateY: tabsSlide }] }]}>
@@ -114,38 +143,67 @@ export const LibraryScreen = () => {
           contentContainerStyle={{ paddingBottom: 150, paddingHorizontal: 20 }}
           showsVerticalScrollIndicator={false}
         >
-          {filteredItems.map((item, index) => {
-            const IconComp = item.icon;
-            return (
-              <TouchableOpacity
-                key={item.id}
-                style={[styles.listItem, {
+          {filteredItems.length === 0 ? (
+            <View style={[styles.emptyState, {
+              backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
+              borderColor: isDarkMode ? colors.border : '#F3F4F6',
+            }]}>
+              <Layers color={colors.textSecondary} size={32} />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                {materials.length === 0 ? 'No materials yet' : 'No matches found'}
+              </Text>
+              <Text style={[styles.emptySub, { color: colors.textSecondary }]}>
+                {materials.length === 0 ? 'Generate some study materials to see them here!' : 'Try a different search or filter.'}
+              </Text>
+            </View>
+          ) : (
+            filteredItems.map((item) => {
+              const config = typeToIcon[item.type] || typeToIcon['Flashcards'];
+              const IconComp = config.icon;
+              const itemCount = Array.isArray(item.data) ? `${item.data.length} items` : item.type;
+              return (
+                <View key={item.id} style={[styles.listItem, {
                   backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
                   borderColor: isDarkMode ? colors.border : '#F3F4F6',
-                }]}
-                activeOpacity={0.7}
-                onPress={() => {
-                  if (item.type === 'Flashcards') navigation.navigate('FlashCards', {});
-                  else if (item.type === 'Quiz') navigation.navigate('Quiz', {});
-                  else if (item.type === 'Notes') navigation.navigate('Summary', {});
-                }}
-              >
-                {/* Color accent left border */}
-                <View style={[styles.itemAccent, { backgroundColor: item.color }]} />
-                <View style={[styles.iconBox, { backgroundColor: item.bg }]}>
-                  <IconComp color={item.color} size={20} />
+                }]}>
+                  {/* Color accent left border */}
+                  <View style={[styles.itemAccent, { backgroundColor: config.color }]} />
+                  <TouchableOpacity
+                    style={styles.itemTouchable}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      if (item.type === 'Flashcards') navigation.navigate('FlashCards', { data: item.data, title: item.title });
+                      else if (item.type === 'Quiz') navigation.navigate('Quiz', { data: item.data, title: item.title });
+                      else if (item.type === 'Summary') navigation.navigate('Summary', { data: item.data, title: item.title });
+                      else if (item.type === 'Mind Map') navigation.navigate('MindMap', { data: item.data, title: item.title });
+                    }}
+                  >
+                    <View style={[styles.iconBox, { backgroundColor: config.bg }]}>
+                      <IconComp color={config.color} size={20} />
+                    </View>
+                    <View style={styles.itemInfo}>
+                      <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
+                      <Text style={[styles.itemSubtitle, { color: colors.textSecondary }]}>{itemCount} • {timeAgo(item.createdAt)}</Text>
+                    </View>
+                    <View style={[styles.badge, { backgroundColor: config.bg }]}>
+                      <Text style={[styles.badgeText, { color: config.color }]}>{item.type}</Text>
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.deleteBtn, { backgroundColor: isDarkMode ? 'rgba(239,68,68,0.12)' : '#FEF2F2' }]}
+                    onPress={() => {
+                      Alert.alert('Delete', `Delete "${item.title}"?`, [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Delete', style: 'destructive', onPress: () => deleteMaterial(item.id) },
+                      ]);
+                    }}
+                  >
+                    <Text style={styles.deleteBtnText}>✕</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.itemInfo}>
-                  <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
-                  <Text style={[styles.itemSubtitle, { color: colors.textSecondary }]}>{item.subtitle}</Text>
-                </View>
-                <View style={[styles.badge, { backgroundColor: item.bg }]}>
-                  <Text style={[styles.badgeText, { color: item.color }]}>{item.type}</Text>
-                </View>
-                <ChevronRight color={colors.border} size={18} style={{ marginLeft: 8 }} />
-              </TouchableOpacity>
-            );
-          })}
+              );
+            })
+          )}
         </ScrollView>
       </Animated.View>
     </View>
@@ -256,5 +314,61 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 11,
     fontWeight: '700',
+  },
+  itemTouchable: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  deleteBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  deleteBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#EF4444',
+  },
+
+  // Search bar
+  searchBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    paddingVertical: 0,
+  },
+
+  // Empty State
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  emptySub: {
+    fontSize: 13,
+    textAlign: 'center',
+    paddingHorizontal: 30,
   },
 });

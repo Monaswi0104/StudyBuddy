@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { useStudyStore } from '../store/studyStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -45,6 +46,7 @@ export const StatsScreen = () => {
   const navigation = useNavigation<any>();
   const { colors, isDarkMode } = useTheme();
   const { t } = useTranslation();
+  const materials = useStudyStore((state) => state.materials);
 
   // Staggered animations
   const headerFade = useRef(new Animated.Value(0)).current;
@@ -71,22 +73,76 @@ export const StatsScreen = () => {
     ]).start();
   }, [headerFade, headerSlide, streakFade, streakSlide, gridFade, gridSlide, chartFade, chartSlide]);
 
+  // Calculate dynamic stats
+  const totalMaterials = materials.length;
+  const totalFlashcards = materials.filter(m => m.type === 'Flashcards').reduce((acc, m) => acc + (Array.isArray(m.data) ? m.data.length : 0), 0);
+  const totalQuizzes = materials.filter(m => m.type === 'Quiz').length;
+  const totalSummaries = materials.filter(m => m.type === 'Summary').length;
+
+  // Calculate streak
+  const calculateStreak = () => {
+    if (materials.length === 0) return 0;
+    const uniqueDays = new Set(
+      materials.map(m => {
+        const d = new Date(m.createdAt);
+        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      })
+    );
+    let streak = 0;
+    const check = new Date();
+    check.setHours(0, 0, 0, 0);
+    const todayKey = `${check.getFullYear()}-${check.getMonth()}-${check.getDate()}`;
+    if (!uniqueDays.has(todayKey)) {
+      check.setDate(check.getDate() - 1);
+    }
+    while (true) {
+      const key = `${check.getFullYear()}-${check.getMonth()}-${check.getDate()}`;
+      if (uniqueDays.has(key)) {
+        streak++;
+        check.setDate(check.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+  const streakCount = calculateStreak();
+
+  // Count materials created today for trend badges
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayMaterials = materials.filter(m => new Date(m.createdAt) >= today);
+  const todayFlashcards = todayMaterials.filter(m => m.type === 'Flashcards').length;
+  const todayQuizzes = todayMaterials.filter(m => m.type === 'Quiz').length;
+  const todaySummaries = todayMaterials.filter(m => m.type === 'Summary').length;
+
   const statCards = [
-    { id: '1', title: t('stats.studyTime'), value: '12h 45m', icon: Clock, color: '#8B5CF6', bg: isDarkMode ? 'rgba(139,92,246,0.15)' : '#F5F3FF', trend: '+2.5h' },
-    { id: '2', title: t('stats.cardsReviewed'), value: '342', icon: Layers, color: '#3B82F6', bg: isDarkMode ? 'rgba(59,130,246,0.15)' : '#EFF6FF', trend: '+48' },
-    { id: '3', title: t('stats.quizzesTaken'), value: '18', icon: HelpCircle, color: '#F43F5E', bg: isDarkMode ? 'rgba(244,63,94,0.15)' : '#FFF1F2', trend: '+3' },
-    { id: '4', title: t('stats.averageScore'), value: '85%', icon: Target, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5', trend: '+5%' },
+    { id: '1', title: 'Total Materials', value: totalMaterials.toString(), icon: Layers, color: '#8B5CF6', bg: isDarkMode ? 'rgba(139,92,246,0.15)' : '#F5F3FF', trend: todayMaterials.length > 0 ? `+${todayMaterials.length}` : '0' },
+    { id: '2', title: 'Flashcards Made', value: totalFlashcards.toString(), icon: Layers, color: '#3B82F6', bg: isDarkMode ? 'rgba(59,130,246,0.15)' : '#EFF6FF', trend: todayFlashcards > 0 ? `+${todayFlashcards}` : '0' },
+    { id: '3', title: 'Quizzes Created', value: totalQuizzes.toString(), icon: HelpCircle, color: '#F43F5E', bg: isDarkMode ? 'rgba(244,63,94,0.15)' : '#FFF1F2', trend: todayQuizzes > 0 ? `+${todayQuizzes}` : '0' },
+    { id: '4', title: 'Summaries', value: totalSummaries.toString(), icon: Target, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5', trend: todaySummaries > 0 ? `+${todaySummaries}` : '0' },
   ];
 
-  const chartData = [
-    { day: 'Mon', height: 40 },
-    { day: 'Tue', height: 60 },
-    { day: 'Wed', height: 30 },
-    { day: 'Thu', height: 80 },
-    { day: 'Fri', height: 50 },
-    { day: 'Sat', height: 100 },
-    { day: 'Sun', height: 70 },
-  ];
+  // Calculate chart data (Last 7 days of generated materials)
+  const chartData = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const dayStr = d.toLocaleDateString('en-US', { weekday: 'short' });
+    
+    // Count materials generated on this day
+    const count = materials.filter(m => {
+      const mDate = new Date(m.createdAt);
+      return mDate.getDate() === d.getDate() && mDate.getMonth() === d.getMonth() && mDate.getFullYear() === d.getFullYear();
+    }).length;
+    
+    return {
+      day: dayStr,
+      count,
+      height: count > 0 ? Math.max(20, Math.min(100, count * 20)) : 10 // scale for height
+    };
+  });
+  
+  const avgGenerated = totalMaterials > 0 ? (totalMaterials / 7).toFixed(1) : '0';
 
   return (
     <ScrollView
@@ -120,8 +176,8 @@ export const StatsScreen = () => {
               <View style={[styles.streakDot, { backgroundColor: '#F59E0B' }]} />
               <Text style={styles.streakLabelText}>{t('home.studyStreak')}</Text>
             </View>
-            <Text style={[styles.streakValue, { color: colors.text }]}>7 <Text style={[styles.streakUnit, { color: colors.textSecondary }]}>{t('home.days')}</Text></Text>
-            <Text style={[styles.streakBest, { color: colors.textSecondary }]}>Best streak: 12 {t('home.days')}</Text>
+            <Text style={[styles.streakValue, { color: colors.text }]}>{streakCount} <Text style={[styles.streakUnit, { color: colors.textSecondary }]}>{t('home.days')}</Text></Text>
+            <Text style={[styles.streakBest, { color: colors.textSecondary }]}>{streakCount > 0 ? 'Keep it going! 🔥' : 'Generate something to start!'}</Text>
           </View>
           <StreakRing />
         </View>
@@ -161,9 +217,9 @@ export const StatsScreen = () => {
       }]}>
         <View style={styles.chartAccent} />
         <View style={styles.chartHeader}>
-          <Text style={[styles.chartTitle, { color: colors.text }]}>{t('stats.studyTimeH')}</Text>
+          <Text style={[styles.chartTitle, { color: colors.text }]}>Materials Generated</Text>
           <View style={[styles.avgBadge, { backgroundColor: isDarkMode ? 'rgba(79,70,229,0.15)' : '#EEF2FF' }]}>
-            <Text style={[styles.avgText, { color: colors.primary }]}>2.5h {t('stats.avg')}</Text>
+            <Text style={[styles.avgText, { color: colors.primary }]}>{avgGenerated} {t('stats.avg')}</Text>
           </View>
         </View>
 

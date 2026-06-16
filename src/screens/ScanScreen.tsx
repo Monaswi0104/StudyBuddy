@@ -75,8 +75,36 @@ export const ScanScreen = () => {
         const textResult = await TextRecognition.recognize(file.uri);
         navigation.replace('Generate', { scannedText: textResult?.text || 'No text found in image.' });
       } else if (file.type === 'application/pdf' || file.name?.endsWith('.pdf')) {
-        // Mock PDF text extraction due to RN offline limitations
-        navigation.replace('Generate', { scannedText: '[PDF Uploaded] Mocked extracted text from PDF... (Full PDF support pending backend API)' });
+        // Use OCR.space free API for lightweight PDF parsing without heavy native dependencies
+        const formData = new FormData();
+        formData.append('file', {
+          uri: file.uri,
+          name: file.name || 'document.pdf',
+          type: 'application/pdf',
+        } as any);
+
+        const response = await fetch('https://api.ocr.space/parse/image', {
+          method: 'POST',
+          headers: {
+            apikey: 'helloworld', // Free public test key
+            'Content-Type': 'multipart/form-data',
+          },
+          body: formData,
+        });
+
+        const data = await response.json();
+        
+        if (data.IsErroredOnProcessing) {
+          throw new Error(data.ErrorMessage?.[0] || 'PDF OCR Failed');
+        }
+
+        const extractedText = data.ParsedResults?.map((res: any) => res.ParsedText).join('\\n') || '';
+        
+        if (!extractedText.trim()) {
+          navigation.replace('Generate', { scannedText: 'No text found in PDF.' });
+        } else {
+          navigation.replace('Generate', { scannedText: extractedText });
+        }
       } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name?.endsWith('.docx')) {
         const base64Str = await RNFS.readFile(file.uri, 'base64');
         const buffer = Buffer.from(base64Str, 'base64');

@@ -1,12 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Animated, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { ChevronLeft, Wand2, Upload, Camera, ArrowRight, Sparkles } from 'lucide-react-native';
+import { ChevronLeft, Wand2, Upload, Camera, ArrowRight, Sparkles, FileText } from 'lucide-react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/StackNav';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import * as DocumentPicker from '@react-native-documents/picker';
+import { isErrorWithCode, errorCodes } from '@react-native-documents/picker';
+import TextRecognition from '@react-native-ml-kit/text-recognition';
+import RNFS from 'react-native-fs';
+// @ts-ignore
+import { GEMINI_API_KEY } from '@env';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -41,6 +47,115 @@ export const GenerateScreen = () => {
   const [outputType, setOutputType] = useState('Flashcards');
   const [difficulty, setDifficulty] = useState('Medium');
   const [isFocused, setIsFocused] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [numItems, setNumItems] = useState(10);
+  const [uploadedFileName, setUploadedFileName] = useState('');
+
+  const handleUploadPdf = async () => {
+    if (isUploading) return;
+    try {
+      const result = await DocumentPicker.pick({
+        type: [DocumentPicker.types.images, DocumentPicker.types.pdf],
+      });
+      const file = result[0];
+      if (!file) return;
+      setIsUploading(true);
+      setUploadedFileName(file.name || 'document');
+
+      if (file.type?.startsWith('image/')) {
+        // Use on-device ML Kit for images — fast and free!
+        const textResult = await TextRecognition.recognize(file.uri);
+        setText(textResult?.text || 'No text found in image.');
+      } else if (file.type === 'application/pdf' || file.name?.endsWith('.pdf')) {
+        let extracted = '';
+        try {
+          const base64Pdf = await RNFS.readFile(file.uri, 'base64');
+          
+          // Try multiple Gemini models in case one hits rate limit
+          const models = ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash'];
+          let lastError = '';
+          
+          for (const model of models) {
+            try {
+              const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+              const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-goog-api-key': GEMINI_API_KEY,
+                },
+                body: JSON.stringify({
+                  contents: [{
+                    parts: [
+                      { text: "Extract and return ALL the text from this PDF document exactly as it appears, page by page. Do not add any markdown formatting, comments, or summaries. Just output the raw text contents of every page of the document." },
+                      { inlineData: { mimeType: "application/pdf", data: base64Pdf } }
+                    ]
+                  }]
+                })
+              });
+              
+              const data = await response.json();
+              if (data.error) {
+                lastError = `[${model}] ${data.error.message || 'API Error'}`;
+                console.log(lastError);
+                continue; // Try next model
+              }
+              
+              extracted = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+              if (extracted) break; // Success!
+            } catch (e: any) {
+              lastError = `[${model}] ${e.message}`;
+              continue;
+            }
+          }
+          
+          if (!extracted) {
+            // Ultimate fallback: Use OCR.space (free, no-auth-required tier) as a local-ish alternative
+            try {
+              console.log('Gemini failed, trying OCR fallback...');
+              const formData = new FormData();
+              formData.append('file', { uri: file.uri, name: file.name || 'document.pdf', type: 'application/pdf' } as any);
+              formData.append('OCREngine', '2');
+              formData.append('scale', 'true');
+              formData.append('isTable', 'true');
+              
+              const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+                method: 'POST',
+                headers: { apikey: 'helloworld' },
+                body: formData,
+              });
+              
+              const ocrData = await ocrResponse.json();
+              extracted = ocrData.ParsedResults?.map((r: any) => r.ParsedText).join('\n') || '';
+              
+              if (extracted) {
+                console.log('Successfully parsed PDF via OCR fallback!');
+              }
+            } catch (localErr: any) {
+              console.log('OCR fallback failed:', localErr);
+              if (lastError) {
+                Alert.alert('Extraction Error', `API limits reached and fallback failed.\n\nAPI Error: ${lastError}`);
+              } else {
+                throw localErr;
+              }
+            }
+          }
+
+        } catch (geminiErr: any) {
+          console.error('Gemini PDF Error:', geminiErr.message);
+          Alert.alert('Gemini Error', geminiErr.message || 'Unknown error');
+        }
+        setText(extracted || '');
+      }
+    } catch (err) {
+      if (!(isErrorWithCode(err) && err.code === errorCodes.OPERATION_CANCELED)) {
+        console.error('Upload Error:', err);
+        Alert.alert('Error', 'Failed to process the file. Please try again.');
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const outputTypes = [
     { id: 'Flashcards', label: t('library.flashcards'), color: '#22C55E' },
@@ -55,8 +170,10 @@ export const GenerateScreen = () => {
     { id: 'Hard', label: t('generate.hard'), color: '#EF4444' },
   ];
 
+  const itemCounts = [5, 10, 15, 20, 25];
+
   const handleGenerate = () => {
-    navigation.navigate('Processing');
+    navigation.navigate('Processing', { scannedText: text, outputType, difficulty, numItems });
   };
 
   return (
@@ -99,31 +216,51 @@ export const GenerateScreen = () => {
             <TouchableOpacity style={[styles.sourceBtn, {
               backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
               borderColor: isDarkMode ? colors.border : 'rgba(59,130,246,0.2)',
-            }]}>
+            }]}
+              onPress={handleUploadPdf}
+              disabled={isUploading}
+            >
               <View style={[styles.sourceIconBox, { backgroundColor: isDarkMode ? 'rgba(59,130,246,0.15)' : '#EFF6FF' }]}>
-                <Upload color="#3B82F6" size={18} />
+                {isUploading ? <ActivityIndicator size="small" color="#3B82F6" /> : <Upload color="#3B82F6" size={18} />}
               </View>
-              <Text style={[styles.sourceBtnText, { color: colors.text }]}>{t('generate.uploadPdf')}</Text>
+              <Text style={[styles.sourceBtnText, { color: colors.text }]}>{isUploading ? 'Processing...' : t('generate.uploadPdf')}</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={[styles.textInputContainer, {
-            backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
-            borderColor: isFocused ? colors.primary : (isDarkMode ? colors.border : '#F3F4F6'),
-          }]}>
-            <View style={[styles.textInputAccent, { backgroundColor: isFocused ? colors.primary : 'transparent' }]} />
-            <TextInput
-              style={[styles.textInput, { color: colors.text }]}
-              placeholder={t('generate.pasteText')}
-              placeholderTextColor={colors.textSecondary}
-              multiline
-              textAlignVertical="top"
-              value={text}
-              onChangeText={setText}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-            />
-          </View>
+          {/* Uploaded File Badge */}
+          {uploadedFileName ? (
+            <View style={[styles.fileBadge, {
+              backgroundColor: isDarkMode ? 'rgba(59,130,246,0.12)' : '#EFF6FF',
+              borderColor: isDarkMode ? 'rgba(59,130,246,0.3)' : 'rgba(59,130,246,0.2)',
+            }]}>
+              <FileText color="#3B82F6" size={16} />
+              <Text style={styles.fileBadgeText} numberOfLines={1}>{uploadedFileName}</Text>
+              <TouchableOpacity onPress={() => { setUploadedFileName(''); setText(''); }}>
+                <Text style={styles.fileBadgeClose}>✕</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          {/* Text Input - only show when no file is uploaded */}
+          {!uploadedFileName ? (
+            <View style={[styles.textInputContainer, {
+              backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
+              borderColor: isFocused ? colors.primary : (isDarkMode ? colors.border : '#F3F4F6'),
+            }]}>
+              <View style={[styles.textInputAccent, { backgroundColor: isFocused ? colors.primary : 'transparent' }]} />
+              <TextInput
+                style={[styles.textInput, { color: colors.text }]}
+                placeholder={t('generate.pasteText')}
+                placeholderTextColor={colors.textSecondary}
+                multiline
+                textAlignVertical="top"
+                value={text}
+                onChangeText={setText}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+              />
+            </View>
+          ) : null}
         </Animated.View>
 
         {/* Output Type */}
@@ -148,6 +285,31 @@ export const GenerateScreen = () => {
             ))}
           </View>
         </Animated.View>
+
+        {/* Number of Items (only for Flashcards, Quiz, Summary) */}
+        {outputType !== 'Mind Map' && (
+          <Animated.View style={[styles.section, { opacity: optionsFade, transform: [{ translateY: optionsSlide }] }]}>
+            <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>NUMBER OF {outputType === 'Quiz' ? 'QUESTIONS' : outputType === 'Flashcards' ? 'FLASHCARDS' : 'KEY POINTS'}</Text>
+            <View style={styles.pillGrid}>
+              {itemCounts.map((count) => (
+                <TouchableOpacity
+                  key={count}
+                  style={[styles.pill, {
+                    backgroundColor: numItems === count
+                      ? colors.primary
+                      : isDarkMode ? colors.surface : '#FFFFFF',
+                    borderColor: numItems === count
+                      ? colors.primary
+                      : isDarkMode ? colors.border : '#F3F4F6',
+                  }, numItems === count && { shadowColor: colors.primary, shadowOpacity: 0.25, shadowOffset: { width: 0, height: 3 }, shadowRadius: 8, elevation: 4 }]}
+                  onPress={() => setNumItems(count)}
+                >
+                  <Text style={[styles.pillText, { color: numItems === count ? '#FFF' : colors.textSecondary }]}>{count}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Animated.View>
+        )}
 
         {/* Difficulty */}
         <Animated.View style={[styles.section, { opacity: optionsFade, transform: [{ translateY: optionsSlide }] }]}>
@@ -215,4 +377,8 @@ const styles = StyleSheet.create({
   generateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 18, borderRadius: 16, backgroundColor: '#4F46E5', shadowColor: '#4F46E5', shadowOpacity: 0.35, shadowOffset: { width: 0, height: 6 }, shadowRadius: 12, elevation: 6 },
   generateBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF', marginRight: 10 },
   genArrow: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center' },
+
+  fileBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, marginBottom: 12, gap: 8 },
+  fileBadgeText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#3B82F6' },
+  fileBadgeClose: { fontSize: 14, fontWeight: '700', color: '#94A3B8', paddingLeft: 4 },
 });

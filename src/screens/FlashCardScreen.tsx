@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, LayoutAnimation } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation/StackNav';
 import { ChevronLeft, Check, X, RotateCcw } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -16,8 +17,11 @@ const mockCards = [
 export const FlashCardScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'FlashCards'>>();
   const { colors, isDarkMode } = useTheme();
   const { t } = useTranslation();
+
+  const cardsData = route.params?.data?.length ? route.params.data : mockCards;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -42,8 +46,8 @@ export const FlashCardScreen = () => {
     ]).start();
   }, [headerFade, cardFade, cardSlide, controlsFade]);
 
-  const currentCard = mockCards[currentIndex];
-  const progress = ((currentIndex + 1) / mockCards.length) * 100;
+  const currentCard = cardsData[currentIndex];
+  const progress = ((currentIndex + 1) / cardsData.length) * 100;
 
   const flipCard = () => {
     if (isFlipped) {
@@ -58,7 +62,7 @@ export const FlashCardScreen = () => {
   };
 
   const nextCard = () => {
-    if (currentIndex < mockCards.length - 1) {
+    if (currentIndex < cardsData.length - 1) {
       flipAnim.setValue(0);
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setIsFlipped(false);
@@ -83,16 +87,16 @@ export const FlashCardScreen = () => {
         }]} onPress={() => navigation.goBack()}>
           <ChevronLeft color={colors.text} size={24} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Biology 101</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>{route.params?.title || 'Flashcards'}</Text>
         <View style={[styles.counterBadge, { backgroundColor: isDarkMode ? colors.surface : '#EEF2FF' }]}>
-          <Text style={[styles.counterText, { color: colors.primary }]}>{currentIndex + 1}/{mockCards.length}</Text>
+          <Text style={[styles.counterText, { color: colors.primary }]}>{currentIndex + 1}/{cardsData.length}</Text>
         </View>
       </Animated.View>
 
       {/* Progress */}
       <Animated.View style={[styles.progressContainer, { opacity: headerFade }]}>
         <View style={styles.progressHeader}>
-          <Text style={[styles.progressText, { color: colors.textSecondary }]}>{t('flashcard.cardOf', { current: currentIndex + 1, total: mockCards.length })}</Text>
+          <Text style={[styles.progressText, { color: colors.textSecondary }]}>{t('flashcard.cardOf', { current: currentIndex + 1, total: cardsData.length })}</Text>
           <Text style={[styles.progressPercent, { color: colors.primary }]}>{Math.round(progress)}%</Text>
         </View>
         <View style={[styles.progressTrack, { backgroundColor: isDarkMode ? colors.border : '#F3F4F6' }]}>

@@ -9,6 +9,7 @@ import { RootStackParamList } from '../navigation/StackNav';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { useStudyStore } from '../store/studyStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -61,7 +62,29 @@ export const HomeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors, isDarkMode } = useTheme();
   const { t } = useTranslation();
-  const { logout } = useAuth();
+  const { logout, session } = useAuth();
+  const materials = useStudyStore((state) => state.materials);
+  const fetchMaterials = useStudyStore((state) => state.fetchMaterials);
+
+  // Fetch materials when session is available
+  useEffect(() => {
+    if (session) {
+      fetchMaterials();
+    }
+  }, [session, fetchMaterials]);
+
+  // Helper: relative time string
+  const timeAgo = (ts: number) => {
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'Yesterday';
+    return `${days} days ago`;
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -110,15 +133,66 @@ export const HomeScreen = () => {
     ]).start();
   }, [headerFade, headerSlide, streakFade, streakSlide, actionsFade, actionsSlide, sessionsFade, sessionsSlide, bannerFade, bannerSlide]);
 
-  const days = [
-    { name: 'M', active: true },
-    { name: 'T', active: true },
-    { name: 'W', active: true },
-    { name: 'T', active: true },
-    { name: 'F', active: true },
-    { name: 'S', active: true },
-    { name: 'S', active: true },
-  ];
+  // Calculate which days of this week had study activity
+  const getWeekDays = () => {
+    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0=Sun
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - dayOfWeek + 1); // Monday
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // For each day Mon-Sun, check if any material was created on that day
+    return ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((name, i) => {
+      const dayStart = new Date(startOfWeek);
+      dayStart.setDate(startOfWeek.getDate() + i);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayStart.getDate() + 1);
+
+      const active = materials.some(m => {
+        const d = new Date(m.createdAt);
+        return d >= dayStart && d < dayEnd;
+      });
+      return { name, active };
+    });
+  };
+
+  const days = getWeekDays();
+
+  // Calculate streak (consecutive days with at least 1 material, ending today or yesterday)
+  const calculateStreak = () => {
+    if (materials.length === 0) return 0;
+    const uniqueDays = new Set(
+      materials.map(m => {
+        const d = new Date(m.createdAt);
+        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      })
+    );
+    let streak = 0;
+    const check = new Date();
+    check.setHours(0, 0, 0, 0);
+    // Check if today has activity, if not start from yesterday
+    const todayKey = `${check.getFullYear()}-${check.getMonth()}-${check.getDate()}`;
+    if (!uniqueDays.has(todayKey)) {
+      check.setDate(check.getDate() - 1);
+    }
+    while (true) {
+      const key = `${check.getFullYear()}-${check.getMonth()}-${check.getDate()}`;
+      if (uniqueDays.has(key)) {
+        streak++;
+        check.setDate(check.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const streakCount = calculateStreak();
+  const streakProgress = Math.min(streakCount / 7 * 100, 100); // progress out of 7 day goal
+
+  // User's first name
+  const userName = session?.user?.user_metadata?.full_name?.split(' ')[0] || 'Student';
 
   const quickActions = [
     { title: t('home.scanNotes'), icon: Camera, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5', route: 'Scan' },
@@ -127,11 +201,14 @@ export const HomeScreen = () => {
     { title: t('home.summarizeText'), icon: FileText, color: '#F97316', bg: isDarkMode ? 'rgba(249,115,22,0.15)' : '#FFF7ED', route: 'Summary' },
   ];
 
-  const recentSessions = [
-    { id: '1', title: 'Machine Learning Basics', subtitle: '20 flashcards • 15 min ago', score: 80, icon: BookOpen, color: '#6366F1' },
-    { id: '2', title: 'Neural Networks', subtitle: '25 flashcards • Yesterday', score: 78, icon: TrendingUp, color: '#3B82F6' },
-    { id: '3', title: 'Data Structures', subtitle: '30 flashcards • 2 days ago', score: 92, icon: Zap, color: '#22C55E' },
-  ];
+  const recentMaterials = materials.slice(0, 5);
+
+  const typeConfig: Record<string, { icon: any; color: string }> = {
+    'Flashcards': { icon: Layers, color: '#6366F1' },
+    'Quiz': { icon: HelpCircle, color: '#3B82F6' },
+    'Summary': { icon: FileText, color: '#F59E0B' },
+    'Mind Map': { icon: TrendingUp, color: '#22C55E' },
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 10, backgroundColor: colors.background }]}>
@@ -142,12 +219,12 @@ export const HomeScreen = () => {
         {/* Header */}
         <Animated.View style={[styles.header, { opacity: headerFade, transform: [{ translateY: headerSlide }] }]}>
           <View>
-            <Text style={[styles.greeting, { color: colors.text }]}>{t('home.greeting')}</Text>
+            <Text style={[styles.greeting, { color: colors.text }]}>Hi, {userName}</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{t('home.subtitle')}</Text>
           </View>
           <View style={[styles.streakBadge, { backgroundColor: isDarkMode ? 'rgba(245,158,11,0.15)' : '#FFF8EB' }]}>
             <Flame color="#F59E0B" fill="#F59E0B" size={16} />
-            <Text style={styles.streakBadgeText}>7</Text>
+            <Text style={styles.streakBadgeText}>{streakCount}</Text>
           </View>
         </Animated.View>
 
@@ -167,10 +244,10 @@ export const HomeScreen = () => {
                 <View style={[styles.streakDot, { backgroundColor: '#22C55E' }]} />
                 <Text style={[styles.streakLabel, { color: colors.success }]}>{t('home.studyStreak')}</Text>
               </View>
-              <Text style={[styles.streakDays, { color: colors.text }]}>7 <Text style={[styles.streakDaysUnit, { color: colors.textSecondary }]}>{t('home.days')}</Text></Text>
-              <Text style={[styles.streakMotivation, { color: colors.textSecondary }]}>{t('home.keepItUp')}</Text>
+              <Text style={[styles.streakDays, { color: colors.text }]}>{streakCount} <Text style={[styles.streakDaysUnit, { color: colors.textSecondary }]}>{t('home.days')}</Text></Text>
+              <Text style={[styles.streakMotivation, { color: colors.textSecondary }]}>{streakCount > 0 ? t('home.keepItUp') : 'Start studying to build a streak!'}</Text>
             </View>
-            <AnimatedCircularProgress progress={100} size={72} strokeWidth={7} />
+            <AnimatedCircularProgress progress={streakProgress} size={72} strokeWidth={7} />
           </View>
 
           {/* Days of Week */}
@@ -210,10 +287,8 @@ export const HomeScreen = () => {
                   onPress={() => {
                     if (action.route === 'Scan') {
                       navigation.navigate('MainTabs', { screen: 'Scan' });
-                    } else if (action.route === 'Quiz') {
-                      navigation.navigate('Quiz', {});
-                    } else if (action.route === 'Summary') {
-                      navigation.navigate('Summary', {});
+                    } else if (action.route === 'Quiz' || action.route === 'Summary') {
+                      navigation.navigate('Generate');
                     } else {
                       navigation.navigate(action.route as any);
                     }
@@ -242,37 +317,47 @@ export const HomeScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {recentSessions.map((session) => {
-            const SessionIcon = session.icon;
-            return (
-              <TouchableOpacity
-                key={session.id}
-                style={[styles.sessionCard, {
-                  backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
-                  borderColor: isDarkMode ? colors.border : '#F3F4F6',
-                }]}
-                activeOpacity={0.7}
-              >
-                <View style={[styles.sessionIconBox, { backgroundColor: isDarkMode ? `${session.color}20` : `${session.color}10` }]}>
-                  <SessionIcon color={session.color} size={20} />
-                </View>
-                <View style={styles.sessionInfo}>
-                  <Text style={[styles.sessionTitle, { color: colors.text }]}>{session.title}</Text>
-                  <Text style={[styles.sessionSubtitle, { color: colors.textSecondary }]}>{session.subtitle}</Text>
-                  {/* Mini progress bar */}
-                  <View style={[styles.progressTrack, { backgroundColor: isDarkMode ? colors.border : '#F3F4F6' }]}>
-                    <View style={[styles.progressFill, {
-                      width: `${session.score}%`,
-                      backgroundColor: session.score >= 90 ? '#22C55E' : session.score >= 70 ? '#3B82F6' : '#F59E0B',
-                    }]} />
+          {recentMaterials.length === 0 ? (
+            <View style={[styles.emptyState, {
+              backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
+              borderColor: isDarkMode ? colors.border : '#F3F4F6',
+            }]}>
+              <BookOpen color={colors.textSecondary} size={32} />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>No study materials yet</Text>
+              <Text style={[styles.emptySub, { color: colors.textSecondary }]}>Scan some notes or upload a PDF to get started!</Text>
+            </View>
+          ) : (
+            recentMaterials.map((material) => {
+              const config = typeConfig[material.type] || { icon: BookOpen, color: '#6366F1' };
+              const MaterialIcon = config.icon;
+              const itemCount = Array.isArray(material.data) ? `${material.data.length} items` : material.type;
+              return (
+                <TouchableOpacity
+                  key={material.id}
+                  style={[styles.sessionCard, {
+                    backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
+                    borderColor: isDarkMode ? colors.border : '#F3F4F6',
+                  }]}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    if (material.type === 'Flashcards') navigation.navigate('FlashCards', { data: material.data });
+                    else if (material.type === 'Quiz') navigation.navigate('Quiz', { data: material.data });
+                    else if (material.type === 'Summary') navigation.navigate('Summary', { data: material.data });
+                    else if (material.type === 'Mind Map') navigation.navigate('MindMap', { data: material.data });
+                  }}
+                >
+                  <View style={[styles.sessionIconBox, { backgroundColor: isDarkMode ? `${config.color}20` : `${config.color}10` }]}>
+                    <MaterialIcon color={config.color} size={20} />
                   </View>
-                </View>
-                <View style={styles.scoreContainer}>
-                  <Text style={[styles.sessionScore, { color: session.score >= 90 ? '#22C55E' : session.score >= 70 ? '#3B82F6' : '#F59E0B' }]}>{session.score}%</Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+                  <View style={styles.sessionInfo}>
+                    <Text style={[styles.sessionTitle, { color: colors.text }]} numberOfLines={1}>{material.title}</Text>
+                    <Text style={[styles.sessionSubtitle, { color: colors.textSecondary }]}>{itemCount} • {timeAgo(material.createdAt)}</Text>
+                  </View>
+                  <ChevronRight color={colors.border} size={18} />
+                </TouchableOpacity>
+              );
+            })
+          )}
         </Animated.View>
       </ScrollView>
 
@@ -583,5 +668,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // Empty State
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  emptySub: {
+    fontSize: 13,
+    textAlign: 'center',
+    paddingHorizontal: 30,
   },
 });

@@ -1,14 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
-import { useNavigation, StackActions } from '@react-navigation/native';
+import { View, Text, StyleSheet, Animated, Easing, Alert } from 'react-native';
+import { useNavigation, useRoute, RouteProp, StackActions } from '@react-navigation/native';
 import { Bot } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { generateStudyMaterial } from '../api/aiService';
+import { parseAIResponse } from '../utils/parseAIResponse';
+import { RootStackParamList } from '../navigation/StackNav';
+import { useStudyStore, StudyMaterial } from '../store/studyStore';
 
 export const ProcessingScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'Processing'>>();
   const { colors, isDarkMode } = useTheme();
   const { t } = useTranslation();
+  const addMaterial = useStudyStore((state) => state.addMaterial);
   
   const pulseValue = useRef(new Animated.Value(1)).current;
   const rotateValue = useRef(new Animated.Value(0)).current;
@@ -32,20 +38,80 @@ export const ProcessingScreen = () => {
       ])
     ).start();
 
-    // Simulate AI steps
-    const timer1 = setTimeout(() => setStepText(t('processing.step2')), 1500);
-    const timer2 = setTimeout(() => setStepText(t('processing.step3')), 3000);
-    const timer3 = setTimeout(() => {
-      // Use replace so user can't go back to the loading screen
-      navigation.dispatch(StackActions.replace('FlashCards', {}));
-    }, 4500);
+    let isMounted = true;
+
+    const processAI = async () => {
+      try {
+        const { scannedText = '', outputType = 'Summary', difficulty = 'Medium', numItems = 10 } = route.params || {};
+        
+        if (!scannedText) {
+          throw new Error('No text provided for generation.');
+        }
+
+        setTimeout(() => isMounted && setStepText(t('processing.step2')), 1500);
+
+        const rawJson = await generateStudyMaterial({ 
+          text: scannedText, 
+          outputType: outputType as any, 
+          difficulty,
+          numItems,
+        });
+        const parsedData = parseAIResponse(rawJson, outputType);
+
+        // Generate a title from the first 40 chars of the scanned text
+        const autoTitle = scannedText.substring(0, 40).replace(/\n/g, ' ').trim() + (scannedText.length > 40 ? '...' : '');
+
+        // Generate a valid UUID v4 for Supabase
+        const generateUUID = () => {
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+        };
+
+        // Save to persistent store
+        const newMaterial: StudyMaterial = {
+          id: generateUUID(),
+          title: autoTitle || 'Untitled',
+          type: outputType as StudyMaterial['type'],
+          difficulty,
+          data: parsedData,
+          createdAt: Date.now(),
+        };
+        addMaterial(newMaterial);
+
+        if (isMounted) setStepText(t('processing.step3'));
+
+        setTimeout(() => {
+          if (!isMounted) return;
+          // Navigate to respective screens based on output type
+          if (outputType === 'Flashcards') {
+            navigation.dispatch(StackActions.replace('FlashCards', { data: parsedData, title: newMaterial.title }));
+          } else if (outputType === 'Quiz') {
+            navigation.dispatch(StackActions.replace('Quiz', { data: parsedData, title: newMaterial.title }));
+          } else if (outputType === 'Summary') {
+            navigation.dispatch(StackActions.replace('Summary', { data: parsedData, title: newMaterial.title }));
+          } else if (outputType === 'Mind Map') {
+            navigation.dispatch(StackActions.replace('MindMap', { data: parsedData, title: newMaterial.title }));
+          } else {
+            navigation.dispatch(StackActions.replace('MainTabs'));
+          }
+        }, 1000);
+        
+      } catch (error: any) {
+        if (isMounted) {
+          Alert.alert('Error', error.message || 'Something went wrong during generation.');
+          navigation.goBack();
+        }
+      }
+    };
+
+    processAI();
 
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
+      isMounted = false;
     };
-  }, [navigation, pulseValue, rotateValue, t]);
+  }, [navigation, pulseValue, rotateValue, t, route.params]);
 
   const spin = rotateValue.interpolate({
     inputRange: [-1, 1],

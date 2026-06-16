@@ -19,13 +19,13 @@ import { LegalScreen } from '../screens/LegalScreen';
 
 export type RootStackParamList = {
   MainTabs: { screen?: string } | undefined;
-  FlashCards: { summaryId?: string };
-  Quiz: { summaryId?: string };
-  Summary: { summaryId?: string };
-  Processing: undefined;
+  FlashCards: { summaryId?: string; data?: any[]; title?: string } | undefined;
+  Quiz: { summaryId?: string; data?: any[]; title?: string } | undefined;
+  Summary: { summaryId?: string; data?: any; title?: string } | undefined;
+  Processing: { scannedText?: string; outputType?: string; difficulty?: string; numItems?: number } | undefined;
   Generate: { scannedText?: string } | undefined;
-  QuizResult: { score?: number };
-  MindMap: { summaryId?: string };
+  QuizResult: { score: number; total: number; title?: string } | undefined;
+  MindMap: { summaryId?: string; data?: any; title?: string } | undefined;
   StudyGoals: undefined;
   StatsStack: undefined;
   LibraryStack: undefined;

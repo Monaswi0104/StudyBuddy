@@ -1,7 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation/StackNav';
 import { ChevronLeft, Share2, FileText, CheckCircle2, ArrowRight } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -9,8 +10,25 @@ import { useTranslation } from 'react-i18next';
 export const SummaryScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
+  const route = useRoute<RouteProp<RootStackParamList, 'Summary'>>();
   const { colors, isDarkMode } = useTheme();
   const { t } = useTranslation();
+
+  const rawData = route.params?.data || {};
+  
+  // Handle case where LLM might wrap it in a nested "summary" object
+  const actualData = typeof rawData.summary === 'object' && rawData.summary !== null && rawData.summary.summary 
+    ? rawData.summary 
+    : rawData;
+
+  const data = {
+    summary: actualData.summary || 'Cells are the basic structural, functional, and biological units of all known organisms. A cell is the smallest unit of life.',
+    keyPoints: Array.isArray(actualData.keyPoints) ? actualData.keyPoints : [
+      'Nucleus: Contains the cell\'s genetic material (DNA).',
+      'Mitochondria: The powerhouse of the cell, generates ATP.',
+      'Ribosomes: Responsible for protein synthesis.'
+    ]
+  };
 
   const headerFade = useRef(new Animated.Value(0)).current;
   const titleFade = useRef(new Animated.Value(0)).current;
@@ -57,7 +75,7 @@ export const SummaryScreen = () => {
             <FileText color="#F59E0B" size={24} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.docTitle, { color: colors.text }]}>Cellular Biology 101</Text>
+            <Text style={[styles.docTitle, { color: colors.text }]} numberOfLines={2}>{route.params?.title || 'Summary'}</Text>
             <Text style={[styles.docSub, { color: colors.textSecondary }]}>{t('summary.generatedNow')}</Text>
           </View>
         </Animated.View>
@@ -71,33 +89,24 @@ export const SummaryScreen = () => {
             <View style={styles.tldrAccent} />
             <Text style={[styles.tldrTitle, { color: colors.primary }]}>{t('summary.tldr')}</Text>
             <Text style={[styles.tldrText, { color: colors.text }]}>
-              Cells are the basic structural, functional, and biological units of all known organisms. A cell is the smallest unit of life.
+              {data.summary}
             </Text>
           </View>
 
-          {/* Key Organelles */}
+          {/* Key Organelles / Points */}
           <View style={styles.section}>
-            <Text style={[styles.sectionHeading, { color: colors.text }]}>Key Organelles</Text>
-            {[
-              { bold: 'Nucleus:', text: ' Contains the cell\'s genetic material (DNA).', color: '#6366F1' },
-              { bold: 'Mitochondria:', text: ' The powerhouse of the cell, generates ATP.', color: '#22C55E' },
-              { bold: 'Ribosomes:', text: ' Responsible for protein synthesis.', color: '#3B82F6' },
-            ].map((item, i) => (
-              <View key={i} style={styles.bulletRow}>
-                <View style={[styles.bulletDot, { backgroundColor: item.color }]} />
-                <Text style={[styles.bulletText, { color: colors.textSecondary }]}>
-                  <Text style={{ fontWeight: '700', color: colors.text }}>{item.bold}</Text>{item.text}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Cell Division */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionHeading, { color: colors.text }]}>Cell Division</Text>
-            <Text style={[styles.paragraphText, { color: colors.textSecondary }]}>
-              Mitosis is a part of the cell cycle in which replicated chromosomes are separated into two new nuclei. Cell division gives rise to genetically identical cells in which the total number of chromosomes is maintained.
-            </Text>
+            <Text style={[styles.sectionHeading, { color: colors.text }]}>Key Points</Text>
+            {data.keyPoints.map((point: string, i: number) => {
+              const color = i % 3 === 0 ? '#6366F1' : i % 3 === 1 ? '#22C55E' : '#3B82F6';
+              return (
+                <View key={i} style={styles.bulletRow}>
+                  <View style={[styles.bulletDot, { backgroundColor: color }]} />
+                  <Text style={[styles.bulletText, { color: colors.textSecondary }]}>
+                    {point}
+                  </Text>
+                </View>
+              );
+            })}
           </View>
 
           {/* Ready Card */}

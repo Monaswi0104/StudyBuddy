@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, LayoutAnimation, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation, StackActions } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp, StackActions } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation/StackNav';
 import { ChevronLeft, CheckCircle2, XCircle, ArrowRight } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -17,8 +18,11 @@ const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
 export const QuizScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'Quiz'>>();
   const { colors, isDarkMode } = useTheme();
   const { t } = useTranslation();
+
+  const quizData = route.params?.data?.length ? route.params.data : mockQuestions;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -45,8 +49,8 @@ export const QuizScreen = () => {
     ]).start();
   }, [headerFade, questionFade, questionSlide, optionsFade, optionsSlide]);
 
-  const currentQ = mockQuestions[currentIndex];
-  const progress = ((currentIndex + 1) / mockQuestions.length) * 100;
+  const currentQ = quizData[currentIndex];
+  const progress = ((currentIndex + 1) / quizData.length) * 100;
 
   const handleSelect = (index: number) => {
     if (!isSubmitted) {
@@ -61,7 +65,7 @@ export const QuizScreen = () => {
       if (selectedOption === currentQ.correctAnswer) setScore(prev => prev + 1);
       setIsSubmitted(true);
     } else {
-      if (currentIndex < mockQuestions.length - 1) {
+      if (currentIndex < quizData.length - 1) {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setCurrentIndex(prev => prev + 1);
         setSelectedOption(null);
@@ -82,9 +86,9 @@ export const QuizScreen = () => {
         }]} onPress={() => navigation.goBack()}>
           <ChevronLeft color={colors.text} size={24} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>{t('quiz.title')}</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>{route.params?.title || t('quiz.title')}</Text>
         <View style={[styles.counterBadge, { backgroundColor: isDarkMode ? colors.surface : '#EEF2FF' }]}>
-          <Text style={[styles.counterText, { color: colors.primary }]}>{currentIndex + 1}/{mockQuestions.length}</Text>
+          <Text style={[styles.counterText, { color: colors.primary }]}>{currentIndex + 1}/{quizData.length}</Text>
         </View>
       </Animated.View>
 
@@ -93,7 +97,7 @@ export const QuizScreen = () => {
         <View style={[styles.progressTrack, { backgroundColor: isDarkMode ? colors.border : '#F3F4F6' }]}>
           <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={[styles.progressText, { color: colors.textSecondary }]}>{t('quiz.questionOf', { current: currentIndex + 1, total: mockQuestions.length })}</Text>
+        <Text style={[styles.progressText, { color: colors.textSecondary }]}>{t('quiz.questionOf', { current: currentIndex + 1, total: quizData.length })}</Text>
       </Animated.View>
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20 }} showsVerticalScrollIndicator={false}>
@@ -110,7 +114,7 @@ export const QuizScreen = () => {
 
         {/* Options */}
         <Animated.View style={[styles.optionsContainer, { opacity: optionsFade, transform: [{ translateY: optionsSlide }] }]}>
-          {currentQ.options.map((option, index) => {
+          {currentQ.options.map((option: string, index: number) => {
             const isSelected = selectedOption === index;
             const isCorrect = isSubmitted && index === currentQ.correctAnswer;
             const isWrong = isSubmitted && isSelected && index !== currentQ.correctAnswer;
@@ -169,7 +173,7 @@ export const QuizScreen = () => {
           onPress={handleSubmit}
         >
           <Text style={[styles.submitBtnText, selectedOption === null && !isSubmitted && { color: colors.textSecondary }]}>
-            {!isSubmitted ? t('quiz.submitAnswer') : (currentIndex < mockQuestions.length - 1 ? t('quiz.nextQuestion') : t('quiz.viewResults'))}
+            {!isSubmitted ? t('quiz.submitAnswer') : (currentIndex < quizData.length - 1 ? t('quiz.nextQuestion') : t('quiz.viewResults'))}
           </Text>
           {(selectedOption !== null || isSubmitted) && <View style={styles.submitArrow}><ArrowRight color="#4F46E5" size={16} /></View>}
         </TouchableOpacity>

@@ -13,7 +13,7 @@ export const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors, isDarkMode } = useTheme();
-  const { logout } = useAuth();
+  const { logout, session } = useAuth();
   const { t } = useTranslation();
 
   // Staggered animations
@@ -103,12 +103,14 @@ export const ProfileScreen = () => {
         <View style={styles.avatarContainer}>
           <View style={styles.avatarRing}>
             <View style={styles.avatarBox}>
-              <Text style={styles.avatarText}>M</Text>
+              <Text style={styles.avatarText}>
+                {session?.user?.user_metadata?.full_name?.[0]?.toUpperCase() || session?.user?.email?.[0]?.toUpperCase() || 'M'}
+              </Text>
             </View>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={[styles.name, { color: colors.text }]}>Monaswi</Text>
-            <Text style={[styles.email, { color: colors.textSecondary }]}>monaswi1792@gmail.com</Text>
+            <Text style={[styles.name, { color: colors.text }]}>{session?.user?.user_metadata?.full_name || 'Student'}</Text>
+            <Text style={[styles.email, { color: colors.textSecondary }]}>{session?.user?.email || 'student@example.com'}</Text>
             <View style={[styles.premiumBadge, { backgroundColor: isDarkMode ? 'rgba(139,92,246,0.15)' : '#F5F3FF' }]}>
               <Crown color="#8B5CF6" size={12} />
               <Text style={styles.premiumText}>{t('profile.premiumUser')}</Text>

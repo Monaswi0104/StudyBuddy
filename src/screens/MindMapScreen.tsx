@@ -1,19 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { ChevronLeft, Share2, ZoomIn, ZoomOut } from 'lucide-react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { RootStackParamList } from '../navigation/StackNav';
 
 export const MindMapScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'MindMap'>>();
   const { colors, isDarkMode } = useTheme();
   const { t } = useTranslation();
 
-  const centerNode = { x: 300, y: 300, label: 'Biology 101', color: '#4F46E5', bg: '#EEF2FF' };
+  const centerNode = { x: 300, y: 300, label: route.params?.title || 'Mind Map', color: '#4F46E5', bg: '#EEF2FF' };
   const childNodes = [
     { id: 1, x: 300, y: 150, label: 'Cell Structure', color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
     { id: 2, x: 150, y: 400, label: 'Genetics', color: '#F59E0B', bg: isDarkMode ? 'rgba(245,158,11,0.15)' : '#FFF8EB' },

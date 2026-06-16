@@ -1,13 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, LayoutAnimation, Animated } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, LayoutAnimation, Animated, Alert } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, BookOpen, Sparkles } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../navigation/AuthStack';
+import { supabase } from '../api/supabaseClient';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+// @ts-ignore
+import { GOOGLE_WEB_CLIENT_ID } from '@env';
+
+GoogleSignin.configure({
+  webClientId: GOOGLE_WEB_CLIENT_ID,
+});
 
 const GoogleIcon = () => (
   <Svg width="18" height="18" viewBox="0 0 48 48">
@@ -19,24 +26,18 @@ const GoogleIcon = () => (
   </Svg>
 );
 
-const AppleIcon = ({ color }: { color: string }) => (
-  <Svg width="18" height="18" viewBox="0 0 384 512">
-    <Path fill={color} d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
-  </Svg>
-);
-
-// Unused width removed
+// AppleIcon removed
 
 export const LoginScreen = () => {
   const insets = useSafeAreaInsets();
   const { colors, isDarkMode } = useTheme();
-  const { login } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Animations
   const logoScale = useRef(new Animated.Value(0)).current;
@@ -66,14 +67,62 @@ export const LoginScreen = () => {
     ]).start();
   }, [fadeAnim, logoScale, slideAnim]);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setError('Please fill in all fields');
       return;
     }
     setError('');
-    login();
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setError(error.message);
+    }
+    setLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setError('');
+      setLoading(true);
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      
+      if (userInfo.type === 'success' && userInfo.data.idToken) {
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: userInfo.data.idToken,
+        });
+        
+        if (error) {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          setError(error.message);
+        }
+      } else if (userInfo.type !== 'cancelled') {
+        throw new Error('No ID token present!');
+      }
+    } catch (err: any) {
+      console.log('Google Sign-In Error:', err);
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      if (err.code === statusCodes.SIGN_IN_CANCELLED) {
+        setError(''); // Just ignore cancellation
+      } else if (err.code === statusCodes.IN_PROGRESS) {
+        setError('Sign in is already in progress');
+      } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        setError('Play services not available or outdated');
+      } else {
+        setError(err.message || 'An error occurred during Google Sign-In');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -117,7 +166,7 @@ export const LoginScreen = () => {
             <Text style={[styles.label, { color: colors.text }]}>Email</Text>
             <View style={[
               styles.inputContainer,
-              { backgroundColor: isDarkMode ? colors.surface : '#F8F9FB', borderColor: email ? colors.primary : 'transparent' }
+              { backgroundColor: isDarkMode ? colors.surface : '#F8F9FB', borderColor: email ? colors.primary : (isDarkMode ? colors.border : '#E2E4E9') }
             ]}>
               <View style={[styles.iconWrap, { backgroundColor: isDarkMode ? 'rgba(79,70,229,0.15)' : 'rgba(79,70,229,0.08)' }]}>
                 <Mail color={colors.primary} size={18} />
@@ -138,7 +187,7 @@ export const LoginScreen = () => {
             <Text style={[styles.label, { color: colors.text }]}>Password</Text>
             <View style={[
               styles.inputContainer,
-              { backgroundColor: isDarkMode ? colors.surface : '#F8F9FB', borderColor: password ? colors.primary : 'transparent' }
+              { backgroundColor: isDarkMode ? colors.surface : '#F8F9FB', borderColor: password ? colors.primary : (isDarkMode ? colors.border : '#E2E4E9') }
             ]}>
               <View style={[styles.iconWrap, { backgroundColor: isDarkMode ? 'rgba(79,70,229,0.15)' : 'rgba(79,70,229,0.08)' }]}>
                 <Lock color={colors.primary} size={18} />
@@ -172,12 +221,15 @@ export const LoginScreen = () => {
             style={styles.loginBtn}
             onPress={handleLogin}
             activeOpacity={0.85}
+            disabled={loading}
           >
-            <View style={styles.loginBtnGradient}>
-              <Text style={styles.loginBtnText}>Sign In</Text>
-              <View style={styles.arrowCircle}>
-                <ArrowRight color="#4F46E5" size={18} />
-              </View>
+            <View style={[styles.loginBtnGradient, { opacity: loading ? 0.7 : 1 }]}>
+              <Text style={styles.loginBtnText}>{loading ? 'Signing In...' : 'Sign In'}</Text>
+              {!loading && (
+                <View style={styles.arrowCircle}>
+                  <ArrowRight color="#4F46E5" size={18} />
+                </View>
+              )}
             </View>
           </TouchableOpacity>
 
@@ -190,17 +242,15 @@ export const LoginScreen = () => {
 
           {/* Social buttons */}
           <View style={styles.socialRow}>
-            <TouchableOpacity style={[styles.socialBtn, { backgroundColor: isDarkMode ? colors.surface : '#F8F9FB', borderColor: colors.border }]}>
+            <TouchableOpacity 
+              style={[styles.socialBtn, { backgroundColor: isDarkMode ? colors.surface : '#F8F9FB', borderColor: colors.border }]}
+              onPress={handleGoogleSignIn}
+              disabled={loading}
+            >
               <View style={styles.socialIconWrap}>
                 <GoogleIcon />
               </View>
-              <Text style={[styles.socialText, { color: colors.text }]}>Google</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.socialBtn, { backgroundColor: isDarkMode ? colors.surface : '#F8F9FB', borderColor: colors.border }]}>
-              <View style={styles.socialIconWrap}>
-                <AppleIcon color={isDarkMode ? '#FFF' : '#000'} />
-              </View>
-              <Text style={[styles.socialText, { color: colors.text }]}>Apple</Text>
+              <Text style={[styles.socialText, { color: colors.text }]}>Continue with Google</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
