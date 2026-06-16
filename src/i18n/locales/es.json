@@ -40,7 +40,10 @@
     "logOut": "Cerrar sesión",
     "save": "Guardar",
     "fullName": "Nombre completo",
-    "emailAddress": "Correo electrónico"
+    "emailAddress": "Correo electrónico",
+    "logoutConfirmTitle": "Cerrar Sesión",
+    "logoutConfirmMessage": "¿Estás seguro de que quieres cerrar sesión?",
+    "cancel": "Cancelar"
   },
   "language": {
     "title": "Idioma",

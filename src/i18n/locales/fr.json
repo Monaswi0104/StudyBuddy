@@ -40,7 +40,10 @@
     "logOut": "Se déconnecter",
     "save": "Enregistrer",
     "fullName": "Nom complet",
-    "emailAddress": "Adresse e-mail"
+    "emailAddress": "Adresse e-mail",
+    "logoutConfirmTitle": "Déconnexion",
+    "logoutConfirmMessage": "Êtes-vous sûr de vouloir vous déconnecter ?",
+    "cancel": "Annuler"
   },
   "language": {
     "title": "Langue",

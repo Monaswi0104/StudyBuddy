@@ -40,7 +40,10 @@
     "logOut": "Abmelden",
     "save": "Speichern",
     "fullName": "Vollständiger Name",
-    "emailAddress": "E-Mail Adresse"
+    "emailAddress": "E-Mail Adresse",
+    "logoutConfirmTitle": "Abmelden",
+    "logoutConfirmMessage": "Sind Sie sicher, dass Sie sich abmelden möchten?",
+    "cancel": "Abbrechen"
   },
   "language": {
     "title": "Sprache",

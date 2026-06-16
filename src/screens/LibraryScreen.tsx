@@ -1,116 +1,154 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Search, FileText, Layers, HelpCircle, MoreVertical } from 'lucide-react-native';
+import { Search, FileText, Layers, HelpCircle, ChevronRight } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/StackNav';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 export const LibraryScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('All');
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
+  // Staggered animations
+  const headerFade = useRef(new Animated.Value(0)).current;
+  const headerSlide = useRef(new Animated.Value(20)).current;
+  const tabsFade = useRef(new Animated.Value(0)).current;
+  const tabsSlide = useRef(new Animated.Value(20)).current;
+  const listFade = useRef(new Animated.Value(0)).current;
+  const listSlide = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
-    ]).start();
-  }, [fadeAnim, slideAnim]);
-  
-  const tabs = ['All', 'Notes', 'Flashcards', 'Quizzes'];
+    const stagger = (fade: Animated.Value, slide: Animated.Value, delay: number) =>
+      Animated.parallel([
+        Animated.timing(fade, { toValue: 1, duration: 450, delay, useNativeDriver: true }),
+        Animated.timing(slide, { toValue: 0, duration: 450, delay, useNativeDriver: true }),
+      ]);
 
-  const libraryItems = [
-    { id: '1', title: 'Photosynthesis Notes', subtitle: 'Today • 20 cards', type: 'Flashcards', icon: Layers, color: '#10B981', badgeBg: '#ECFDF5', badgeText: '#059669' },
-    { id: '2', title: 'Machine Learning Basics', subtitle: 'Yesterday • 28 cards', type: 'Flashcards', icon: Layers, color: '#10B981', badgeBg: '#ECFDF5', badgeText: '#059669' },
-    { id: '3', title: 'Neural Networks', subtitle: '2 days ago • 30 cards', type: 'Flashcards', icon: Layers, color: '#10B981', badgeBg: '#ECFDF5', badgeText: '#059669' },
-    { id: '4', title: 'Data Structures Notes', subtitle: '3 days ago • Notes', type: 'Notes', icon: FileText, color: '#F59E0B', badgeBg: '#FFFBEB', badgeText: '#D97706' },
-    { id: '5', title: 'Operating System Concepts', subtitle: '6 days ago • 10 cards', type: 'Quiz', icon: HelpCircle, color: '#3B82F6', badgeBg: '#EFF6FF', badgeText: '#2563EB' },
-    { id: '6', title: 'Database Management', subtitle: '1 week ago • 22 cards', type: 'Flashcards', icon: Layers, color: '#10B981', badgeBg: '#ECFDF5', badgeText: '#059669' },
+    Animated.parallel([
+      stagger(headerFade, headerSlide, 0),
+      stagger(tabsFade, tabsSlide, 100),
+      stagger(listFade, listSlide, 200),
+    ]).start();
+  }, [headerFade, headerSlide, tabsFade, tabsSlide, listFade, listSlide]);
+
+  const tabs = [
+    { key: 'All', label: t('library.all') },
+    { key: 'Notes', label: t('library.notes') },
+    { key: 'Flashcards', label: t('library.flashcards') },
+    { key: 'Quizzes', label: t('library.quizzes') },
   ];
 
+  const libraryItems = [
+    { id: '1', title: 'Photosynthesis Notes', subtitle: 'Today • 20 cards', type: 'Flashcards', icon: Layers, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
+    { id: '2', title: 'Machine Learning Basics', subtitle: 'Yesterday • 28 cards', type: 'Flashcards', icon: Layers, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
+    { id: '3', title: 'Neural Networks', subtitle: '2 days ago • 30 cards', type: 'Flashcards', icon: Layers, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
+    { id: '4', title: 'Data Structures Notes', subtitle: '3 days ago • Notes', type: 'Notes', icon: FileText, color: '#F59E0B', bg: isDarkMode ? 'rgba(245,158,11,0.15)' : '#FFF8EB' },
+    { id: '5', title: 'Operating System Concepts', subtitle: '6 days ago • 10 cards', type: 'Quiz', icon: HelpCircle, color: '#3B82F6', bg: isDarkMode ? 'rgba(59,130,246,0.15)' : '#EFF6FF' },
+    { id: '6', title: 'Database Management', subtitle: '1 week ago • 22 cards', type: 'Flashcards', icon: Layers, color: '#22C55E', bg: isDarkMode ? 'rgba(34,197,94,0.15)' : '#ECFDF5' },
+  ];
+
+  const filteredItems = libraryItems.filter(item => {
+    if (activeTab === 'All') return true;
+    if (activeTab === 'Notes' && item.type === 'Notes') return true;
+    if (activeTab === 'Flashcards' && item.type === 'Flashcards') return true;
+    if (activeTab === 'Quizzes' && item.type === 'Quiz') return true;
+    return false;
+  });
+
   return (
-    <Animated.View style={[styles.container, { paddingTop: insets.top + 10, backgroundColor: colors.background, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+    <View style={[styles.container, { paddingTop: insets.top + 10, backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Animated.View style={[styles.header, { opacity: headerFade, transform: [{ translateY: headerSlide }] }]}>
+        <View>
           <Text style={[styles.headerTitle, { color: colors.text }]}>{t('library.title')}</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>{filteredItems.length} items</Text>
         </View>
-        <TouchableOpacity style={[styles.searchBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Search color={colors.text} size={24} />
+        <TouchableOpacity style={[styles.searchBtn, {
+          backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
+          borderColor: isDarkMode ? colors.border : '#F3F4F6',
+        }]}>
+          <Search color={colors.text} size={20} />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <Animated.View style={[styles.tabsContainer, { opacity: tabsFade, transform: [{ translateY: tabsSlide }] }]}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
           {tabs.map((tab) => (
-            <TouchableOpacity 
-              key={tab} 
+            <TouchableOpacity
+              key={tab.key}
               style={[
-                styles.tab, 
-                { backgroundColor: colors.surface, borderColor: colors.border },
-                activeTab === tab && { backgroundColor: colors.primary, borderColor: colors.primary }
+                styles.tab,
+                {
+                  backgroundColor: activeTab === tab.key
+                    ? colors.primary
+                    : isDarkMode ? colors.surface : '#FFFFFF',
+                  borderColor: activeTab === tab.key
+                    ? colors.primary
+                    : isDarkMode ? colors.border : '#F3F4F6',
+                },
+                activeTab === tab.key && styles.tabActive,
               ]}
-              onPress={() => setActiveTab(tab)}
+              onPress={() => setActiveTab(tab.key)}
             >
               <Text style={[
-                styles.tabText, 
-                { color: colors.textSecondary },
-                activeTab === tab && { color: colors.white }
-              ]}>
-                {tab === 'All' ? t('library.all') : tab === 'Notes' ? t('library.notes') : tab === 'Flashcards' ? t('library.flashcards') : t('library.quizzes')}
-              </Text>
+                styles.tabText,
+                { color: activeTab === tab.key ? '#FFF' : colors.textSecondary },
+              ]}>{tab.label}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
+      </Animated.View>
 
       {/* List */}
-      <ScrollView 
-        contentContainerStyle={{ paddingBottom: 150, paddingHorizontal: 20 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {libraryItems.filter(item => {
-          if (activeTab === 'All') return true;
-          if (activeTab === 'Notes' && item.type === 'Notes') return true;
-          if (activeTab === 'Flashcards' && item.type === 'Flashcards') return true;
-          if (activeTab === 'Quizzes' && item.type === 'Quiz') return true;
-          return false;
-        }).map(item => (
-          <TouchableOpacity 
-            key={item.id} 
-            style={[styles.listItem, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            onPress={() => {
-              if (item.type === 'Flashcards') navigation.navigate('FlashCards', {});
-              else if (item.type === 'Quiz') navigation.navigate('Quiz', {});
-              else if (item.type === 'Notes') navigation.navigate('Summary', {});
-            }}
-          >
-            <View style={[styles.iconBox, { backgroundColor: item.badgeBg }]}>
-              <item.icon color={item.color} size={24} />
-            </View>
-            <View style={styles.itemInfo}>
-              <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
-              <Text style={[styles.itemSubtitle, { color: colors.textSecondary }]}>{item.subtitle}</Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: item.badgeBg }]}>
-              <Text style={[styles.badgeText, { color: item.badgeText }]}>{item.type}</Text>
-            </View>
-            <TouchableOpacity style={styles.moreBtn}>
-              <MoreVertical color={colors.textSecondary} size={20} />
-            </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </Animated.View>
+      <Animated.View style={[{ flex: 1, opacity: listFade, transform: [{ translateY: listSlide }] }]}>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 150, paddingHorizontal: 20 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {filteredItems.map((item, index) => {
+            const IconComp = item.icon;
+            return (
+              <TouchableOpacity
+                key={item.id}
+                style={[styles.listItem, {
+                  backgroundColor: isDarkMode ? colors.surface : '#FFFFFF',
+                  borderColor: isDarkMode ? colors.border : '#F3F4F6',
+                }]}
+                activeOpacity={0.7}
+                onPress={() => {
+                  if (item.type === 'Flashcards') navigation.navigate('FlashCards', {});
+                  else if (item.type === 'Quiz') navigation.navigate('Quiz', {});
+                  else if (item.type === 'Notes') navigation.navigate('Summary', {});
+                }}
+              >
+                {/* Color accent left border */}
+                <View style={[styles.itemAccent, { backgroundColor: item.color }]} />
+                <View style={[styles.iconBox, { backgroundColor: item.bg }]}>
+                  <IconComp color={item.color} size={20} />
+                </View>
+                <View style={styles.itemInfo}>
+                  <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
+                  <Text style={[styles.itemSubtitle, { color: colors.textSecondary }]}>{item.subtitle}</Text>
+                </View>
+                <View style={[styles.badge, { backgroundColor: item.bg }]}>
+                  <Text style={[styles.badgeText, { color: item.color }]}>{item.type}</Text>
+                </View>
+                <ChevronRight color={colors.border} size={18} style={{ marginLeft: 8 }} />
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </Animated.View>
+    </View>
   );
 };
 
@@ -127,26 +165,42 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    marginTop: 2,
   },
   searchBtn: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 1,
   },
   tabsContainer: {
-    paddingLeft: 20,
     marginBottom: 20,
   },
   tab: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 20,
+    borderRadius: 24,
     marginRight: 10,
     borderWidth: 1,
+  },
+  tabActive: {
+    shadowColor: '#4F46E5',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 8,
+    elevation: 4,
   },
   tabText: {
     fontSize: 14,
@@ -159,38 +213,48 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 12,
     borderWidth: 1,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 1,
+  },
+  itemAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 8,
+    bottom: 8,
+    width: 3,
+    borderRadius: 2,
   },
   iconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   itemInfo: {
     flex: 1,
     marginRight: 12,
   },
   itemTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   itemSubtitle: {
-    fontSize: 13,
+    fontSize: 12,
   },
   badge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
-    marginRight: 12,
+    borderRadius: 10,
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '700',
-  },
-  moreBtn: {
-    padding: 4,
   },
 });

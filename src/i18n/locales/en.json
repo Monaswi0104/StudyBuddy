@@ -40,7 +40,10 @@
     "logOut": "Log Out",
     "save": "Save",
     "fullName": "Full Name",
-    "emailAddress": "Email Address"
+    "emailAddress": "Email Address",
+    "logoutConfirmTitle": "Log Out",
+    "logoutConfirmMessage": "Are you sure you want to log out of your account?",
+    "cancel": "Cancel"
   },
   "language": {
     "title": "Language",

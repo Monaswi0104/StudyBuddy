@@ -40,7 +40,10 @@
     "logOut": "ログアウト",
     "save": "保存",
     "fullName": "フルネーム",
-    "emailAddress": "メールアドレス"
+    "emailAddress": "メールアドレス",
+    "logoutConfirmTitle": "ログアウト",
+    "logoutConfirmMessage": "本当にログアウトしますか？",
+    "cancel": "キャンセル"
   },
   "language": {
     "title": "言語",

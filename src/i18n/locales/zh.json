@@ -40,7 +40,10 @@
     "logOut": "退出登录",
     "save": "保存",
     "fullName": "全名",
-    "emailAddress": "电子邮件地址"
+    "emailAddress": "电子邮件地址",
+    "logoutConfirmTitle": "登出",
+    "logoutConfirmMessage": "您确定要注销帐户吗？",
+    "cancel": "取消"
   },
   "language": {
     "title": "语言",
