@@ -1,97 +1,104 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+<div align="center">
+  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/graduation-cap.svg" width="120" height="120" alt="StudyBuddy Logo" />
+  <h1>📚 StudyBuddy</h1>
+  <p><strong>Your AI-Powered Exam Preparation Companion</strong></p>
 
-# Getting Started
+  <p>
+    <img src="https://img.shields.io/badge/React_Native-0.73-blue?style=for-the-badge&logo=react" alt="React Native" />
+    <img src="https://img.shields.io/badge/Kotlin-Native_Modules-purple?style=for-the-badge&logo=kotlin" alt="Kotlin" />
+    <img src="https://img.shields.io/badge/Groq-Llama_3.1-orange?style=for-the-badge&logo=ai" alt="Groq AI" />
+    <img src="https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase" alt="Supabase" />
+  </p>
+</div>
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## 🌟 Overview
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+StudyBuddy is a mobile application built to help students automatically generate high-quality study materials from their notes and textbooks. Whether you're preparing for board exams or high-stakes competitive entrance tests like **JEE, NEET, or AIIMS**, StudyBuddy acts as your personal AI tutor.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Upload a PDF or snap a picture of your notes, and the app will instantly generate interactive flashcards, quizzes with detailed explanations, and comprehensive summaries.
 
-```sh
-# Using npm
-npm start
+## ✨ Key Features
 
-# OR using Yarn
-yarn start
-```
+- **🧠 Competitive Exam Generation:** Uses the Groq AI API (`llama-3.1-8b-instant`) with carefully engineered prompts to generate NCERT, JEE Main, and JEE Advanced level questions. Features numerical multi-step problems, realistic distractors, and complete step-by-step solutions.
+- **⚡ Native On-Device PDF Extraction:** Bypasses slow JavaScript parsers by utilizing a **custom-built Kotlin Native Module** powered by Apache PDFBox. Extracts text from 100+ page PDFs in milliseconds entirely offline, ensuring zero API quota limits on document reading.
+- **📸 ML-Kit OCR Integration:** Instantly recognizes text from physical notes using Google's on-device ML Kit.
+- **🛡️ Fault-Tolerant AI Chunking:** Intelligently splits massive documents into manageable chunks and feeds them to the LLM. Features built-in resilience, automatically handling API rate limits (`HTTP 429`) with exact exponential backoff, ensuring complete generation without crashing.
+- **💾 Cloud Sync with Supabase:** Secure authentication and PostgreSQL database storage so your flashcards and quizzes are always synced across devices.
+- **🎨 Fluid UI/UX:** A beautiful, responsive interface featuring Dark/Light mode support, complex layout animations, and custom circular progress SVG graphics for quiz results.
 
-## Step 2: Build and run your app
+## 🏗️ Technical Architecture
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+This project was built from the ground up as a **Bare React Native CLI** application (not Expo), allowing for deep native integrations.
 
-### Android
+### Custom Native Modules
+A major technical challenge was the performance bottleneck of parsing PDFs in the JavaScript thread. To solve this, a custom Android native module was written in Kotlin:
+- **`PdfTextExtractorModule.kt`**: Bridges React Native to the `pdfbox-android` library. It loads the PDF stream directly from the Android URI, loops through pages natively on a background thread, and resolves a highly optimized string array back to JS.
 
-```sh
-# Using npm
-npm run android
+### AI Integration & Rate Limit Handling
+To generate study materials without bankrupting API limits on large texts:
+1. **Extraction:** Native code grabs raw text (Free & Offline).
+2. **Chunking:** `chunkingService.ts` safely splits text by sentence boundaries into 3000-character segments.
+3. **Processing Loop:** `aiService.ts` fetches from the Groq API sequentially. It parses retry-headers to perfectly time delays and gracefully skips chunks that fail JSON validation, guaranteeing the app never crashes during a long generation process.
 
-# OR using Yarn
-yarn android
-```
+## 🚀 Getting Started
 
-### iOS
+### Prerequisites
+- Node.js (v18+)
+- Android Studio / Android SDK
+- Ruby & CocoaPods (for iOS)
+- Supabase Account
+- Groq API Key
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### Installation
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Monaswi0104/StudyBuddy.git
+   cd StudyBuddy
+   ```
 
-```sh
-bundle install
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-Then, and every time you update your native dependencies, run:
+3. Setup Environment Variables:
+   Create a `.env` file in the root directory:
+   ```env
+   GROQ_API_KEY=your_groq_api_key
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-```sh
-bundle exec pod install
-```
+4. Run the app:
+   ```bash
+   # For Android
+   npm run android
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+   # For iOS
+   cd ios && pod install && cd ..
+   npm run ios
+   ```
 
-```sh
-# Using npm
-npm run ios
+## 📱 Screenshots
 
-# OR using Yarn
-yarn ios
-```
+*(Add screenshots of your application here to make the README pop!)*
+- Home Screen
+- PDF Upload & Generation State
+- Quiz Interface
+- Flashcards UI
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## 🛠️ Built With
+- [React Native](https://reactnative.dev/)
+- [Supabase](https://supabase.com/)
+- [Groq](https://groq.com/) (Llama 3.1)
+- [Apache PDFBox](https://pdfbox.apache.org/) (Android Native)
+- [Google ML Kit](https://developers.google.com/ml-kit) (React Native ML Kit)
+- [Lucide Icons](https://lucide.dev/)
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+---
+<div align="center">
+  <i>Designed and developed as a portfolio project demonstrating Native Module bridging, LLM orchestration, and modern React Native architecture.</i>
+</div>

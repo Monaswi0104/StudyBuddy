@@ -97,7 +97,7 @@ JSON Schemas:
                 waitTimeMs = parseFloat(match[1]) * 1000 + 500; // wait exactly what it asks + 500ms buffer
               }
               console.log(`[Rate Limit] Waiting ${waitTimeMs}ms before retry ${retries + 1}/${maxRetries}...`);
-              await new Promise(resolve => setTimeout(resolve, waitTimeMs));
+              await new Promise<void>(resolve => setTimeout(() => resolve(), waitTimeMs));
               retries++;
               continue;
             }
@@ -110,7 +110,7 @@ JSON Schemas:
           console.warn(`Chunk ${i+1} attempt ${retries+1} failed:`, err.message);
           retries++;
           if (retries <= maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise<void>(resolve => setTimeout(() => resolve(), 2000));
           }
         }
       }
