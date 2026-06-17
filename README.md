@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/graduation-cap.svg" width="120" height="120" alt="StudyBuddy Logo" />
+  <img src="./assets/StudyBuddy.png" width="120" height="120" alt="StudyBuddy Logo" style="border-radius: 24px;" />
   <h1>📚 StudyBuddy</h1>
   <p><strong>Your AI-Powered Exam Preparation Companion</strong></p>
 
@@ -85,8 +85,6 @@ To generate study materials without bankrupting API limits on large texts:
 ## 📱 Screenshots
 
 <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 10px;">
-  <img src="./assets/screenshots/screen01.png" width="22%" />
-  <img src="./assets/screenshots/screen02.png" width="22%" />
   <img src="./assets/screenshots/screen03.png" width="22%" />
   <img src="./assets/screenshots/screen04.png" width="22%" />
   <img src="./assets/screenshots/screen05.png" width="22%" />
