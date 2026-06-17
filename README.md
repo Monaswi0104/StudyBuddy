@@ -93,6 +93,8 @@ To generate study materials without bankrupting API limits on large texts:
   <img src="./assets/screenshots/screen06.png" width="22%" />
   <img src="./assets/screenshots/screen07.png" width="22%" />
   <img src="./assets/screenshots/screen08.png" width="22%" />
+  <img src="./assets/screenshots/screen09.png" width="22%" />
+  <img src="./assets/screenshots/screen10.png" width="22%" />
 </div>
 
 ## 🛠️ Built With
