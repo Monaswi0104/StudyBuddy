@@ -48,13 +48,18 @@ export const ProcessingScreen = () => {
           throw new Error('No text provided for generation.');
         }
 
-        setTimeout(() => isMounted && setStepText(t('processing.step2')), 1500);
-
         const rawJson = await generateStudyMaterial({ 
           text: scannedText, 
           outputType: outputType as any, 
           difficulty,
           numItems,
+          onProgress: (current, total) => {
+            if (isMounted && total > 1) {
+              setStepText(`Processing part ${current} of ${total}...`);
+            } else if (isMounted) {
+              setStepText(t('processing.step2'));
+            }
+          }
         });
         const parsedData = parseAIResponse(rawJson, outputType);
 

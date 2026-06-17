@@ -71,7 +71,7 @@ export const QuizScreen = () => {
         setSelectedOption(null);
         setIsSubmitted(false);
       } else {
-        navigation.dispatch(StackActions.replace('QuizResult', { score }));
+        navigation.dispatch(StackActions.replace('QuizResult', { score, total: quizData.length }));
       }
     }
   };

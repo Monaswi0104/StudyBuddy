@@ -11,8 +11,8 @@ import * as DocumentPicker from '@react-native-documents/picker';
 import { isErrorWithCode, errorCodes } from '@react-native-documents/picker';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import RNFS from 'react-native-fs';
-// @ts-ignore
-import { GEMINI_API_KEY } from '@env';
+import { NativeModules } from 'react-native';
+const { PdfTextExtractor } = NativeModules;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -69,81 +69,13 @@ export const GenerateScreen = () => {
       } else if (file.type === 'application/pdf' || file.name?.endsWith('.pdf')) {
         let extracted = '';
         try {
-          const base64Pdf = await RNFS.readFile(file.uri, 'base64');
-          
-          // Try multiple Gemini models in case one hits rate limit
-          const models = ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash'];
-          let lastError = '';
-          
-          for (const model of models) {
-            try {
-              const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-              const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-goog-api-key': GEMINI_API_KEY,
-                },
-                body: JSON.stringify({
-                  contents: [{
-                    parts: [
-                      { text: "Extract and return ALL the text from this PDF document exactly as it appears, page by page. Do not add any markdown formatting, comments, or summaries. Just output the raw text contents of every page of the document." },
-                      { inlineData: { mimeType: "application/pdf", data: base64Pdf } }
-                    ]
-                  }]
-                })
-              });
-              
-              const data = await response.json();
-              if (data.error) {
-                lastError = `[${model}] ${data.error.message || 'API Error'}`;
-                console.log(lastError);
-                continue; // Try next model
-              }
-              
-              extracted = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-              if (extracted) break; // Success!
-            } catch (e: any) {
-              lastError = `[${model}] ${e.message}`;
-              continue;
-            }
-          }
-          
-          if (!extracted) {
-            // Ultimate fallback: Use OCR.space (free, no-auth-required tier) as a local-ish alternative
-            try {
-              console.log('Gemini failed, trying OCR fallback...');
-              const formData = new FormData();
-              formData.append('file', { uri: file.uri, name: file.name || 'document.pdf', type: 'application/pdf' } as any);
-              formData.append('OCREngine', '2');
-              formData.append('scale', 'true');
-              formData.append('isTable', 'true');
-              
-              const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
-                method: 'POST',
-                headers: { apikey: 'helloworld' },
-                body: formData,
-              });
-              
-              const ocrData = await ocrResponse.json();
-              extracted = ocrData.ParsedResults?.map((r: any) => r.ParsedText).join('\n') || '';
-              
-              if (extracted) {
-                console.log('Successfully parsed PDF via OCR fallback!');
-              }
-            } catch (localErr: any) {
-              console.log('OCR fallback failed:', localErr);
-              if (lastError) {
-                Alert.alert('Extraction Error', `API limits reached and fallback failed.\n\nAPI Error: ${lastError}`);
-              } else {
-                throw localErr;
-              }
-            }
-          }
-
-        } catch (geminiErr: any) {
-          console.error('Gemini PDF Error:', geminiErr.message);
-          Alert.alert('Gemini Error', geminiErr.message || 'Unknown error');
+          // Extract text locally on device using PDFBox — works offline, all pages, no API limits!
+          const pages: string[] = await PdfTextExtractor.extractText(file.uri);
+          extracted = Array.isArray(pages) ? pages.join('\n\n') : (pages || '');
+          console.log(`Extracted ${Array.isArray(pages) ? pages.length : 1} pages locally`);
+        } catch (localErr: any) {
+          console.error('Local PDF extraction failed:', localErr.message);
+          Alert.alert('PDF Error', 'Could not extract text from this PDF. It may be a scanned/image-based PDF — try uploading an image instead.');
         }
         setText(extracted || '');
       }

@@ -36,8 +36,8 @@ export const QuizResultScreen = () => {
     ]).start();
   }, [fadeAnim, scaleAnim, statsFade, statsSlide, btnFade]);
 
-  const score = route.params?.score || 2;
-  const total = 3;
+  const score = route.params?.score || 0;
+  const total = route.params?.total || 10;
   const percentage = Math.round((score / total) * 100);
 
   const size = 180;

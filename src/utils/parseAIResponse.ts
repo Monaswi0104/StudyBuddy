@@ -6,7 +6,17 @@ export const parseAIResponse = (jsonString: string, outputType: string) => {
       case 'Flashcards':
         return data.flashcards || [];
       case 'Quiz':
-        return data.quiz || [];
+        return (data.quiz || []).map((q: any) => {
+          let correct = q.correctAnswer;
+          if (typeof correct === 'string') {
+            if (['A', 'B', 'C', 'D'].includes(correct.toUpperCase())) {
+              correct = correct.toUpperCase().charCodeAt(0) - 65;
+            } else {
+              correct = parseInt(correct, 10);
+            }
+          }
+          return { ...q, correctAnswer: isNaN(correct) ? 0 : correct };
+        });
       case 'Summary':
         return data || {};
       case 'Mind Map':
