@@ -84,11 +84,16 @@ To generate study materials without bankrupting API limits on large texts:
 
 ## 📱 Screenshots
 
-*(Add screenshots of your application here to make the README pop!)*
-- Home Screen
-- PDF Upload & Generation State
-- Quiz Interface
-- Flashcards UI
+<div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 10px;">
+  <img src="./assets/screenshots/screen01.png" width="22%" />
+  <img src="./assets/screenshots/screen02.png" width="22%" />
+  <img src="./assets/screenshots/screen03.png" width="22%" />
+  <img src="./assets/screenshots/screen04.png" width="22%" />
+  <img src="./assets/screenshots/screen05.png" width="22%" />
+  <img src="./assets/screenshots/screen06.png" width="22%" />
+  <img src="./assets/screenshots/screen07.png" width="22%" />
+  <img src="./assets/screenshots/screen08.png" width="22%" />
+</div>
 
 ## 🛠️ Built With
 - [React Native](https://reactnative.dev/)
