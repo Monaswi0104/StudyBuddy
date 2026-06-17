@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, LayoutAnimation, Animated, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, LayoutAnimation, Animated, Alert, Image } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, BookOpen, Sparkles } from 'lucide-react-native';
@@ -141,9 +141,9 @@ export const LoginScreen = () => {
           <View style={[styles.decorCircle2, { backgroundColor: 'rgba(124, 58, 237, 0.06)' }]} />
 
           <Animated.View style={[styles.logoContainer, { transform: [{ scale: logoScale }] }]}>
-            <View style={styles.logoOuter}>
-              <View style={styles.logoInner}>
-                <BookOpen color="#FFF" size={32} />
+            <View style={[styles.logoOuter, { backgroundColor: 'transparent' }]}>
+              <View style={[styles.logoInner, { backgroundColor: 'transparent' }]}>
+                <Image source={require('../../assets/StudyBuddy.png')} style={{width: 64, height: 64, borderRadius: 16}} resizeMode="contain" />
               </View>
             </View>
             <View style={styles.sparkleWrap}>

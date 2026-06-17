@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, LayoutAnimation, Animated, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, LayoutAnimation, Animated, Alert, Image } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, ChevronLeft, UserPlus, CheckCircle2 } from 'lucide-react-native';
@@ -177,8 +177,8 @@ export const RegisterScreen = () => {
         {/* Header with icon */}
         <Animated.View style={[styles.headerSection, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <View style={styles.headerIconRow}>
-            <View style={styles.headerIconBox}>
-              <UserPlus color="#FFF" size={24} />
+            <View style={[styles.headerIconBox, { backgroundColor: 'transparent' }]}>
+              <Image source={require('../../assets/StudyBuddy.png')} style={{width: 48, height: 48, borderRadius: 12}} resizeMode="contain" />
             </View>
             <View style={styles.headerTextBlock}>
               <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
